@@ -67,7 +67,6 @@ def spline(x, y, yp1, ypn):
     '''Parameters:
         x       =       1D vector of x-values in increasing order.
         y       =       1D vector of y-values
-        n       =       number of elements in xVector (and yVector)
         yp1     =       first derivative of the interpolating function at the first segment
         ypn     =       first derivative of the interpolating function at the last segment
 
@@ -94,7 +93,7 @@ def spline(x, y, yp1, ypn):
         u[0]=(3/(x[1]-x[0])) * ( ((y[1]-y[0])/ (x[1]-x[0])) - yp1)
 
     for i in range(1,n-1) :     #       Decomposition loop of tridiagonal algorithm. y2 and u are temporary.
-        sig = ( (x[i]-x[i-1])/(x[i+1]-x[i-1]) )
+        sig = (x[i]-x[i-1])/(x[i+1]-x[i-1])
         p = (sig * y2[i-1]) + 2.0
         y2[i] = (sig-1.0)/p
         u[i] = ((6.0*((y[i+1]-y[i])/(x[i+1]-x[i])-(y[i]-y[i-1]) / (x[i]-x[i-1]))/(x[i+1]-x[i-1])-sig*u[i-1])/p)
@@ -143,13 +142,13 @@ def splint(xa, ya, y2a, x):
     khi = int(n-1)
     k = int(0)
     h = 0.0
-    element=0.0
+    element = 0.0
 
     while ((khi-klo) > 1) :
         k = int((khi+klo)/2)
-        element=xa[k]
+        element = xa[k]
 #        print(element,xa[k],k,x)
-        if ( element > x) :
+        if (element > x) :
             khi = k
         else:
             klo = k
@@ -465,7 +464,7 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
         #  g0 is the interpolated value of parameter at re
         #  g1,.. g7 are obtained using the coeffs of polynomial fit
         
-        gn=np.zeros(8);
+        gn=np.zeros(8)
         
         der2 = fd_ends(distance, parameter)
         secarray2 = spline(distance,parameter,der2[0],der2[1])
@@ -536,12 +535,43 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
         (r_re[x]**5)+(1/720)*gn[6]*(r_re[x]**6)+(1/5040)*gn[7]*(r_re[x]**7)   \
         for x in range(len(distance))) , dtype="float")
-        
 
         
         # ----------------------------------------------------------------------------
+        # Generate the xwave for integration
+        xwave=np.linspace(0.50000000001, 2.99999999999999, 250)
+        print(np.shape(xwave));     
+        print(np.shape(distance));     
         
-        # OPTIONAL PLOTTING : MATPLOTLIB        
+        parameter_ME=np.zeros(8)
+        
+        for i in range(len(parameter_ME)):
+            param=np.zeros(len(distance))
+            param=expn[:,i]
+            print(param, len(param), i)
+            print("----------------------")
+            
+            der2 = fd_ends(distance, param)
+            secarray2 = spline(distance,param,der2[0],der2[1])
+            param_sc = splint(distance, param, secarray2, xwave)
+			
+            
+            der2 = fd_ends(rwave, psi1)
+            secarray2 = spline(rwave, psi1, der2[0], der2[1])
+            psi1_sc = splint(rwave, psi1, secarray2, xwave)
+            
+            der2 = fd_ends(rwave, psi2)
+            secarray2 = spline(rwave, psi2, der2[0], der2[1])
+            psi2_sc = splint(rwave, psi2, secarray2, xwave)
+            
+            result = computeInt(xwave, psi1_sc, psi2_sc, xwave, 0.5, 3.0)
+            parameter_ME [i] = result[0]
+            
+			
+        
+        # ----------------------------------------------------------------------------
+        
+        # OPTIONAL PLOTTING : USING  MATPLOTLIB        
         plt.figure(0)
         residual = parameter-poly11(distance,*popt)
         plt.plot(distance, poly11(distance, *popt),linewidth=7.0)
