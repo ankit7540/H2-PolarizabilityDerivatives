@@ -232,10 +232,8 @@ else :
     print("\t\t")
 
     print('\t\tmolecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD" ')
-    print("\t\tbra_v    = vibrational state, v=[0,4]")
-    print("\t\tbra_J    = rotataional state, J=[0,15]")
-    print("\t\tket_v    = vibrational state, v=[0,4]")
-    print("\t\tket_J    = rotataional state, J=[0,15]")
+    print("\t\tv    = vibrational state, v=[0,4]")
+    print("\t\tJ    = rotataional state, J=[0,15]")
     print('\t\tlambda   = wavelength in Hartree, nm or Angstrom, for static specify "s" or "static" here')
     print('\t\tunit of lambda =  for  Hartree           use "H" or "h"  ')
     print('\t\t\t          for  nanometers        use "n" or "nm" ')
@@ -256,13 +254,11 @@ else :
 # vl, Jl, vr , Jr are numbers
 # mol, wavelength unit and operator are string, hence need quotes. 
 
-def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
+def compute(mol, v, J, wavelength, wavelength_unit, operator):
     '''#  parameters:
     # mol  =    molecule (for H2 enter "H2", for D2 enter "D2", for HD enter "HD")
-    # vl   =    vibrational state for the bra, vl = [0,4]
-    # Jl   =    rotational state for the bra,  Jl = [0,15]
-    # vr   =    vibrational state for the ket, vr = [0,4]
-    # Jr   =    rotational state for the ket,  Jr = [0,15]
+    # v   =    vibrational state for the bra, v = [0,4]
+    # J   =    rotational state for the bra,  J = [0,15]
     # wavelength =  wavelength ( can be Hartree, nanometers or Angstrom)
     # wavelength_unit = specify unit using the specifier
                                 ( for  Hartree           use "H" or "h"  )
@@ -320,15 +316,15 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
     anisotropy_static=(static_zz-static_xx)
 
     # step 1: load the required wavefunctions ------------------------
-    Wfn1="./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol,vl,Jl)
-    Wfn2="./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol,vr,Jr)
+    Wfn1="./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol,v,J)
+    Wfn2="./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol,v,J)
     r_wave="./wavefunctions/r_wave.txt"
     #print(Wfn1,Wfn2)
-    if vl < 0 or vr < 0 or vl > 4 or vr > 4 :
-        print("Error : v value out of range. vl and vr = [0,4]. Exiting ")
+    if v < 0  or v > 4  :
+        print("Error : v value out of range. v = [0,4]. Exiting ")
         quit()
 
-    if Jl < 0  or Jr < 0 or Jl > 15 or Jr > 15 : 
+    if J < 0   or J > 15 : 
         print("Error : J value out of range. Jl and Jr =[0,15]. Exiting ")
         quit()
 
@@ -340,7 +336,7 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
     psi1=np.loadtxt(Wfn1)
     psi2=np.loadtxt(Wfn2)
     rwave=np.loadtxt(r_wave)
-    #print(len(psi1),len(psi2),len(rwave))
+    
     #----------------------------------------------------------------
     # STATIC
     if (wavelength == "static" or wavelength == "s"):
@@ -354,10 +350,6 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
             param=anisotropy_static
             name=["anisotropy"]
             n=1
-        elif (operator == "all" or operator == "All" or operator == "ALL") :
-            list = [isotropy,anisotropy]
-            name=["isotropy","anisotropy"]
-            n=2
         else :
             print("Error : Operator not correctly specified. Exiting ")
             quit()
@@ -392,10 +384,6 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
             param=anisotropy
             name=["anisotropy"]
             n=1
-        elif (operator == "all" or operator == "All" or operator == "ALL") :
-            list = [isotropy,anisotropy]
-            name=["isotropy","anisotropy"]
-            n=2
         else :
             print("Error : Operator not correctly specified. Exiting")
             quit()
@@ -426,10 +414,12 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
                 interpolate2D_common(param,omega_nm,omegaFinal)
                 # print(param.shape, omegaFinal)
             temp=d['output'] 
-            parameter[:,0] = temp[:,0]
-	#-----------------------------------------------------
+            parameter = temp[:,0]
+    #-------------------------------------------------------------------------
+    
+    
 
-	# Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
+	# Step 2 : Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
         distance = distance[9:]
         distance = distance[:101]
 
@@ -442,7 +432,7 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
         print("first point {0}, last point {1} " .format(np.round(parameter[0]\
         ,9) , np.round(parameter[-1],9)  ))
 
-        # step 2 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
+    # Step 3 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
         popt, pcov = curve_fit(poly11, distance, parameter)
         # fit coeffcients
         for i in range(len(popt)):
@@ -450,19 +440,19 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
             
         # covariance of the fit coefficients
         #print(pcov)
-        #-----------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------
         
-        # step 3 : Compute the expectation value of the inter-nuclear distance -------
+    # Step 4 : Compute the expectation value of the inter-nuclear distance -------
         result = computeInt(rwave, psi1, psi2, rwave, 0.5, 3.0)
         re = result[0]
-        # ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
 
         
-        # obtain the numerical value of the derivative at re -------------------------
-        # These are described as g0, g1, .. g6, g7
+    # Step 5 : Obtain the numerical value of the derivative at re ----------------
+    # These are described as g0, g1, .. g6, g7
 
-        #  g0 is the interpolated value of parameter at re
-        #  g1,.. g7 are obtained using the coeffs of polynomial fit
+    #  g0 is the interpolated value of parameter at re
+    #  g1,.. g7 are obtained using the coeffs of polynomial fit
         
         gn=np.zeros(8)
         
@@ -537,38 +527,40 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
         for x in range(len(distance))) , dtype="float")
 
         
-        # ----------------------------------------------------------------------------
-        # Generate the xwave for integration
-        xwave=np.linspace(0.50000000001, 2.99999999999999, 250)
-        print(np.shape(xwave));     
-        print(np.shape(distance));     
+    # ----------------------------------------------------------------------------
+    # Computation of the matrix element for the Taylor series expansions of
+    #   the parameter using the expn array(as columns)
+
+        # truncate the rwave, psi1 and psi2, r=0.5--3.0 a.u.
+        rwave = rwave[:701]
+        rwave = rwave[75:]
         
-        parameter_ME=np.zeros(8)
+        psi1 = psi1[:701]
+        psi1 = psi1[75:]
         
+        psi2 = psi2[:701]
+        psi2 = psi2[75:]
+        
+        parameter_ME=np.zeros(8)    # array to keep the matrix elements
+        param_sc=np.zeros(len(rwave))   # interpolation of the expn to rwave
+        
+        # generate interpolation of the expn to rwave using cubic spline
         for i in range(len(parameter_ME)):
             param=np.zeros(len(distance))
             param=expn[:,i]
-            print(param, len(param), i)
-            print("----------------------")
             
             der2 = fd_ends(distance, param)
             secarray2 = spline(distance,param,der2[0],der2[1])
-            param_sc = splint(distance, param, secarray2, xwave)
-			
             
-            der2 = fd_ends(rwave, psi1)
-            secarray2 = spline(rwave, psi1, der2[0], der2[1])
-            psi1_sc = splint(rwave, psi1, secarray2, xwave)
+            for j in range(0,len(rwave)):
+                param_sc[j] = splint(distance,param,secarray2,rwave[j])
             
-            der2 = fd_ends(rwave, psi2)
-            secarray2 = spline(rwave, psi2, der2[0], der2[1])
-            psi2_sc = splint(rwave, psi2, secarray2, xwave)
+            res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+            parameter_ME[i] = res[0]
             
-            result = computeInt(xwave, psi1_sc, psi2_sc, xwave, 0.5, 3.0)
-            parameter_ME [i] = result[0]
+        for i in range(len( parameter_ME )):
+            print ("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator,i ,v, J,  parameter_ME[i]) )            
             
-			
-        
         # ----------------------------------------------------------------------------
         
         # OPTIONAL PLOTTING : USING  MATPLOTLIB        
@@ -593,9 +585,8 @@ def compute(mol, vl, Jl, vr, Jr, wavelength, wavelength_unit, operator):
         plt.plot(distance, expn[:,7])
         plt.plot(distance, parameter, color='black')
         
-        print(computeInt(rwave, psi1, psi2, rwave, 0.5, 3.0))
-        print(len(psi1))
+
         
         # ----------------------------------------------------------------------------
         
-compute("H2",0,0,0,0,514.5,"nm","g")
+compute("H2",0,0,500.5,"nm","g")
