@@ -416,8 +416,21 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             temp=d['output'] 
             parameter = temp[:,0]
     #-------------------------------------------------------------------------
+    # print general information 
     
+        print("\nAnalysis for the derivative of the parameter at re defined by v,J")
+        print("-------------------------------------------------------------------")
     
+        print("Molecule = {0}". format(mol))
+        print("Parameter = {0}". format(name))
+        print("Rovibrational state : v={0}, J={1}". format(v, J))
+        
+        
+    # Step 4 : Compute the expectation value of the inter-nuclear distance -------
+        result = computeInt(rwave, psi1, psi2, rwave, 0.5, 3.0)
+        re = result[0]
+        print("Expectation value of inter-nuclear distance, re = {0} a.u.". format(re))
+    # ----------------------------------------------------------------------------    
 
 	# Step 2 : Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
         distance = distance[9:]
@@ -427,14 +440,16 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         parameter = parameter[:101]
         parameter = np.reshape(parameter,len(parameter))
 
-        print("first point {0}, last point {1} " .format(round(distance[0],9) \
-        , round(distance[-1],9)  ))
-        print("first point {0}, last point {1} " .format(np.round(parameter[0]\
-        ,9) , np.round(parameter[-1],9)  ))
+        #print("first point {0}, last point {1} " .format(round(distance[0],9) \
+        #, round(distance[-1],9)  ))
+        #print("first point {0}, last point {1} " .format(np.round(parameter[0]\
+        #,9) , np.round(parameter[-1],9)  ))
 
     # Step 3 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
         popt, pcov = curve_fit(poly11, distance, parameter)
+        
         # fit coeffcients
+        print("\nFit coefficients, parameter vs distance, fit using poly11")
         for i in range(len(popt)):
             print ("c{0} = {1}".format(i, popt[i]) )
             
@@ -442,10 +457,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         #print(pcov)
     #-----------------------------------------------------------------------------
         
-    # Step 4 : Compute the expectation value of the inter-nuclear distance -------
-        result = computeInt(rwave, psi1, psi2, rwave, 0.5, 3.0)
-        re = result[0]
-    # ----------------------------------------------------------------------------
+
 
         
     # Step 5 : Obtain the numerical value of the derivative at re ----------------
@@ -491,6 +503,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         popt[11]*re**4)
 
         # Derivatives of parameter at re
+        print("\nDerivatives of parameter at re")
         for i in range(len(gn)):
             print ("g{0} = {1}".format(i, gn[i]) )
 
@@ -558,6 +571,8 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
             parameter_ME[i] = res[0]
             
+            
+        print("\nMatrix elements of parameter using Taylor series \n  expansions using n derivatives")    
         for i in range(len( parameter_ME )):
             print ("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator,i ,v, J,  parameter_ME[i]) )            
             
