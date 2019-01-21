@@ -1,12 +1,11 @@
-# Purpose : Load the matrix containing polarizability and wavefunctions, interpolate the
-# polarizability if needed, and compute the respective matrix elements.
+'''# Purpose : Load the matrix containing polarizability and wavefunctions, interpolate the
+# polarizability invariant if needed, determine the deriavtive of the invariant at re and finally, compute the respective matrix elements.'''
 
 # Load necessary modules
 import sys
 import numpy as np
 from scipy import integrate
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
 #-------------------------------------------------------------------
 
 #********************************************************************
@@ -168,36 +167,36 @@ def splint(xa, ya, y2a, x):
 #************************************************************************
 
 # Define the fitting function : polynomial of degree 11
-def poly11(x,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11):
+def poly11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
     return c0+(c1*x)+c2*(x**2)+c3*(x**3)+c4*(x**4)+c5*(x**5)+c6*(x**6)+c7*(x**\
-    7)+c8*(x**8)+c9*(x**9)+c10*(x**10) +c11*(x**11) 
-    
+    7)+c8*(x**8)+c9*(x**9)+c10*(x**10)+c11*(x**11)
+
 #************************************************************************
 
-# Define the wrappend intergral function which computes the matrix element by evaluating the 
+# Define the wrappend intergral function which computes the matrix element by evaluating the
 #   the numerical integral
 
-# y_parameter should be already interpolated to rwave to that the product may be computed    
+# y_parameter should be already interpolated to rwave to that the product may be computed
 
 def computeInt(rwave, psi1, psi2, y_parameter, rMin, rMax):
-    p1=np.multiply(psi1,psi2)
-    p2=np.multiply(p1,rwave)
-    p3=np.multiply(p2,rwave)
-    product=np.multiply(p3, y_parameter)
+    p1 = np.multiply(psi1, psi2)
+    p2 = np.multiply(p1, rwave)
+    p3 = np.multiply(p2, rwave)
+    product = np.multiply(p3, y_parameter)
 
-    derivative=fd_ends(rwave,product)
-    secarray2=spline(rwave,product,derivative[0],derivative[1])
+    derivative = fd_ends(rwave, product)
+    secarray2 = spline(rwave, product, derivative[0], derivative[1])
 
     # function defining the integrand which uses the spline coef array to give interpolated values
     def integrand_ME(xpoint):
-        result=splint(rwave,product,secarray2,xpoint)
+        result = splint(rwave, product, secarray2, xpoint)
         return result
-        
-    res=integrate.quadrature( integrand_ME, rMin, rMax,tol=1.0e-6,vec_func=False,maxiter=1000)
+
+    res = integrate.quadrature( integrand_ME, rMin, rMax, tol=1.0e-6, vec_func=False, maxiter=1000)
     return res
     # output is a tuple, [0] = integral result, [1]=error
 
-#************************************************************************    
+#************************************************************************
 
 # Loading polarizability data and checks  ::::
 
@@ -213,7 +212,7 @@ static_zz = np.loadtxt("./data/static_zz.txt")
 # check size of the arrays -------------------------------
 #print("Dimensions of isotropy matrix :",alpha_xx.shape)
 #print("Dimensions of anisotropy matrix :",alpha_zz.shape)
-if not(alpha_xx.shape ==  alpha_zz.shape  or len(omega)==alpha_xx.shape[0] or len(static_xx) == len(distance) 
+if not(alpha_xx.shape ==  alpha_zz.shape  or len(omega)==alpha_xx.shape[0] or len(static_xx) == len(distance)
       or  len(static_zz) == len(distance) ):
     print("Dimension check on polarizability data matrices or wavelength file failed.")
     quit()
@@ -240,8 +239,8 @@ else :
     print('\t\t\t          for  Angstrom          use "a" or "A"  ')
     print('\t\t\t          if static property is asked then this parameter can be any of the three ')
     print("\t\tAvailable wavelength range: {0} - {1} Hartree;\n   \t\t\t\t\t    {2} - {3} nm; \n   \t\t\t\t\t    {4} - {5} Angstrom".
-         format(round(omega[0],4),round(omega[-1],4),round(omega_nm[0],4),round
-         (omega_nm[-1],4),round(omega_A[0],4),round(omega_A[-1],4)   ))
+         format(round(omega[0], 4),round(omega[-1], 4),round(omega_nm[0], 4),round
+         (omega_nm[-1], 4),round(omega_A[0], 4),round(omega_A[-1], 4)))
     print('\t\toperator	= alpha(perpendicular) = alpha_xx given by "xx" or "x" ')
     print('\t\t\t          alpha(parallel) = alpha_xx given by "zz" or "z" ')
     print('\t\t\t          isotropy or mean polarizability given by "iso" or "mp" or "mean" ')
@@ -252,7 +251,7 @@ else :
 #********************************************************************
 # the actual function for computation of the rovibrational matrix element.
 # vl, Jl, vr , Jr are numbers
-# mol, wavelength unit and operator are string, hence need quotes. 
+# mol, wavelength unit and operator are string, hence need quotes.
 
 def compute(mol, v, J, wavelength, wavelength_unit, operator):
     '''#  parameters:
@@ -278,18 +277,18 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     '''
 
     # set a dictionary for output array
-    d={'output':[0]}
+    d = {'output':[0]}
     #----------------------------------------------------------------
     # interpolation function defined here and is used later.
     def interpolate2D_common(input2D,originalx,finalx):
         inputSize = input2D.shape
         tempx = np.zeros((len(originalx), 1))
-        tempx[:,0] = originalx
+        tempx[:, 0] = originalx
         col = np.zeros((len(originalx), 1))
         outputArray = np.zeros((1, inputSize[1]))
         for i in range(0, inputSize[1]):
-            col[:,0] = input2D[:, i]
-            der = (0.0,0.0)	# derivatives at first and last ends
+            col[:, 0] = input2D[:, i]
+            der = (0.0, 0.0)	# derivatives at first and last ends
             der = fd_ends(tempx, col)
             # print(i,der[0],der[1])
             secarray = spline(tempx, col, der[0], der[1])
@@ -299,57 +298,57 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     #----------------------------------------------------------------
 
     # Load the polarizability data ( alpha_xx and alpha_zz)
-    alpha_xx=np.loadtxt("./data/matrix_xxf.txt")
-    alpha_zz=np.loadtxt("./data/matrix_zzf.txt")
-    omega=np.loadtxt("./data/freq.txt")
-    dist=np.loadtxt("./data/distance.txt")
-    distance= np.asarray(dist)
-    omega_nm=(1e7/(omega*219474.6313702000)) # convert the original freq to nm
-    static_xx=np.loadtxt("./data/static_xx.txt")
-    static_zz=np.loadtxt("./data/static_zz.txt")
+    alpha_xx = np.loadtxt("./data/matrix_xxf.txt")
+    alpha_zz = np.loadtxt("./data/matrix_zzf.txt")
+    omega = np.loadtxt("./data/freq.txt")
+    dist = np.loadtxt("./data/distance.txt")
+    distance = np.asarray(dist)
+    omega_nm = (1e7/(omega*219474.6313702000)) # convert the original freq to nm
+    static_xx = np.loadtxt("./data/static_xx.txt")
+    static_zz = np.loadtxt("./data/static_zz.txt")
 
     # compute the isotropy(mean polarizability) and anisotropy (gamma)
-    isotropy=np.absolute(2*(np.array(alpha_xx))+np.array(alpha_zz))/3
-    anisotropy=np.absolute(np.array(alpha_zz)-np.array(alpha_xx))
+    isotropy = np.absolute(2*(np.array(alpha_xx))+np.array(alpha_zz))/3
+    anisotropy = np.absolute(np.array(alpha_zz)-np.array(alpha_xx))
 
-    isotropy_static=(2*static_xx+static_zz)/3
-    anisotropy_static=(static_zz-static_xx)
+    isotropy_static = (2*static_xx+static_zz)/3
+    anisotropy_static = (static_zz-static_xx)
 
     # step 1: load the required wavefunctions ------------------------
-    Wfn1="./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol,v,J)
-    Wfn2="./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol,v,J)
-    r_wave="./wavefunctions/r_wave.txt"
+    Wfn1 = "./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol, v, J)
+    Wfn2 = "./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol, v, J)
+    r_wave = "./wavefunctions/r_wave.txt"
     #print(Wfn1,Wfn2)
-    if v < 0  or v > 4  :
+    if v < 0  or v > 4:
         print("Error : v value out of range. v = [0,4]. Exiting ")
         quit()
 
-    if J < 0   or J > 15 : 
+    if J < 0   or J > 15:
         print("Error : J value out of range. Jl and Jr =[0,15]. Exiting ")
         quit()
 
-    if not (mol == "H2"  or mol == "HD" or mol == "D2" ): 
-        print("Error : Incorrect molecule chosen. For H2 enter H2, for D2 enter D2, for HD enter HD. Use quotes. Exiting  " )
+    if not (mol == "H2"  or mol == "HD" or mol == "D2"):
+        print("Error : Incorrect molecule chosen. For H2 enter H2, for D2 enter D2, for HD enter HD. Use quotes. Exiting  ")
         quit()
 
     # Proceed to load wavefunctions.
-    psi1=np.loadtxt(Wfn1)
-    psi2=np.loadtxt(Wfn2)
-    rwave=np.loadtxt(r_wave)
-    
+    psi1 = np.loadtxt(Wfn1)
+    psi2 = np.loadtxt(Wfn2)
+    rwave = np.loadtxt(r_wave)
+
     #----------------------------------------------------------------
     # STATIC
-    if (wavelength == "static" or wavelength == "s"):
-        print("\tStatic")
+    if (wavelength == "static" or wavelength == "Static" or wavelength == "s"):
+        #print("\tStatic")
         n=0
-        if (operator == "mean" or operator == "mp" or operator == "iso" ):
+        if (operator == "mean" or operator == "mp" or operator == "iso"):
             param=isotropy_static
-            name=["isotropy"]
-            n=1
-        elif (operator == "diff" or operator == "g" or operator == "aniso" ):
+            name=["isotropy (static)"]
+            n = 1
+        elif (operator == "diff" or operator == "g" or operator == "aniso"):
             param=anisotropy_static
-            name=["anisotropy"]
-            n=1
+            name=["anisotropy (static)"]
+            n = 1
         else :
             print("Error : Operator not correctly specified. Exiting ")
             quit()
@@ -365,9 +364,9 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         elif (wavelength_unit == "a" or wavelength_unit == "A"):
             omegaFinal=(wv/10)
         elif not (wavelength_unit == "h" or wavelength_unit == "H" or wavelength_unit == "n" or wavelength_unit == "nm"
-                  or wavelength_unit == "a" or wavelength_unit == "A" ):
+                  or wavelength_unit == "a" or wavelength_unit == "A"):
             print("Message : Default unit of nm will be used.")
-            omegaFinal=wv
+            omegaFinal = wv
 
         if omegaFinal < omega_nm[0] or omegaFinal > omega_nm[-1]:
             sys.exit("Error : Requested wavelength is out of range. Exiting ")
@@ -376,19 +375,19 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
 
         n=0
 
-        if (operator == "mean" or operator == "mp" or operator == "iso" ):
-            param=isotropy
-            name=["isotropy"]
+        if (operator == "mean" or operator == "mp" or operator == "iso"):
+            param = isotropy
+            name = ["isotropy"]
             n=1
-        elif (operator == "diff" or operator == "g" or operator == "aniso" ):
-            param=anisotropy
-            name=["anisotropy"]
+        elif (operator == "diff" or operator == "g" or operator == "aniso"):
+            param = anisotropy
+            name = ["anisotropy"]
             n=1
-        else :
+        else:
             print("Error : Operator not correctly specified. Exiting")
             quit()
 
-    elif not (wavelength == "static" or wavelength == "s" or isinstance(wavelength, (int,float))  ) :
+    elif not (wavelength == "static" or wavelength == "s" or isinstance(wavelength, (int,float))):
         print('Error : Incorrect specification of wavelength. Use number for dynamic property and "s" or "static" for static. Exiting')
         quit()
 
@@ -396,41 +395,47 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     for i in range(n):    # evaluation of  interpolation and integral
 
         # step 0: prepare parameter vector(s)
-        parameter=np.zeros((len(distance),1))
+        parameter = np.zeros((len(distance), 1))
         # Static
-        if (wavelength=="static" or wavelength == "s"):
+        if (wavelength == "static" or wavelength == "Static" or wavelength == "s"):
             if not(n == 1):
-                parameter=list[i]
+                parameter = list[i]
             else:
-                parameter=param
-        else :
+                parameter = param
+        else:
 
         # interpolate to the asked wavelength ----------------
             if not(n == 1):
-                param=list[i]
+                param = list[i]
                 # print(param.shape, omegaFinal)
-                interpolate2D_common(param,omega_nm,omegaFinal)
-            else :
-                interpolate2D_common(param,omega_nm,omegaFinal)
+                interpolate2D_common(param, omega_nm, omegaFinal)
+            else:
+                interpolate2D_common(param, omega_nm, omegaFinal)
                 # print(param.shape, omegaFinal)
-            temp=d['output'] 
-            parameter = temp[:,0]
+            temp = d['output']
+            parameter = temp[:, 0]
     #-------------------------------------------------------------------------
-    # print general information 
-    
+    # print general information
+
+        if (wavelength == "static" or wavelength == "Static" or wavelength == "s"):
+            wavelength = ""
+            wavelength_unit = ""
+
+        print("-------------------------------------------------------------------")
         print("\nAnalysis for the derivative of the parameter at re defined by v,J")
         print("-------------------------------------------------------------------")
-    
+
         print("Molecule = {0}". format(mol))
         print("Parameter = {0}". format(name))
+        print("Wavelength = {0} {1}". format(wavelength, wavelength_unit))
         print("Rovibrational state : v={0}, J={1}". format(v, J))
-        
-        
+
+
     # Step 4 : Compute the expectation value of the inter-nuclear distance -------
         result = computeInt(rwave, psi1, psi2, rwave, 0.5, 3.0)
         re = result[0]
-        print("Expectation value of inter-nuclear distance, re = {0} a.u.". format(re))
-    # ----------------------------------------------------------------------------    
+        print("Expectation value of inter-nuclear distance, re = {0} a.u.". format(round(re, 6)))
+    # ----------------------------------------------------------------------------
 
 	# Step 2 : Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
         distance = distance[9:]
@@ -438,7 +443,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
 
         parameter = parameter[9:]
         parameter = parameter[:101]
-        parameter = np.reshape(parameter,len(parameter))
+        parameter = np.reshape(parameter, len(parameter))
 
         #print("first point {0}, last point {1} " .format(round(distance[0],9) \
         #, round(distance[-1],9)  ))
@@ -447,57 +452,57 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
 
     # Step 3 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
         popt, pcov = curve_fit(poly11, distance, parameter)
-        
+
         # fit coeffcients
         print("\nFit coefficients, parameter vs distance, fit using poly11")
         for i in range(len(popt)):
-            print ("c{0} = {1}".format(i, popt[i]) )
-            
+            print ("c{0} = {1}".format(i, round(popt[i], 10)))
+
         # covariance of the fit coefficients
         #print(pcov)
     #-----------------------------------------------------------------------------
-        
 
 
-        
+
+
     # Step 5 : Obtain the numerical value of the derivative at re ----------------
     # These are described as g0, g1, .. g6, g7
 
     #  g0 is the interpolated value of parameter at re
     #  g1,.. g7 are obtained using the coeffs of polynomial fit
-        
+
         gn=np.zeros(8)
-        
+
         der2 = fd_ends(distance, parameter)
         secarray2 = spline(distance,parameter,der2[0],der2[1])
-        
+
         gn[0] = splint(distance, parameter, secarray2, re)
 
 
         gn[1] = popt[1]+2*popt[2]*re+(3*popt[3]*re**2)+(4*popt[4]*re**3)+(5*popt[5]\
         *re**4)+(6*popt[6]*re**5)+(7*popt[7]*re**6)+(8*popt[8]*re**7)+(9*popt[\
-        9]*re**8)+(10*popt[10]*re**9)+(11*popt[11]*re**10) 
-    
+        9]*re**8)+(10*popt[10]*re**9)+(11*popt[11]*re**10)
+
         gn[2] = 2*popt[2]+(2*3*popt[3]*re)+(3*4*popt[4]*re**2)+(4*5*popt[5]*re**3)+\
         (5*6*popt[6]*re**4)+(6*7*popt[7]*re**5)+(7*8*popt[8]*re**6)+(8*9*popt[\
-        9]*re**7)+(9*10*popt[10]*re**8)+(10*11*popt[11]*re**9) 
-    
+        9]*re**7)+(9*10*popt[10]*re**8)+(10*11*popt[11]*re**9)
+
         gn[3] = (2*3*popt[3])+(2*3*4*popt[4]*re)+(3*4*5*popt[5]*re**2)+(4*5*6*     \
         popt[6]*re**3)+(5*6*7*popt[7]*re**4)+(6*7*8*popt[8]*re**5)+(7*8*9*    \
         popt[9]*re**6)+(8*9*10*popt[10]*re**7)+(9*10*11*popt[11]*re**8)
-           
+
         gn[4] = (2*3*4*popt[4])+(2*3*4*5*popt[5]*re)+(3*4*5*6*popt[6]*re**2)+(4*5*6\
         *7*popt[7]*re**3)+(5*6*7*8*popt[8]*re**4)+(6*7*8*9*popt[9]*re**5)+(7*8\
-        *9*10*popt[10]*re**6)+(8*9*10*11*popt[11]*re**7) 
-           
+        *9*10*popt[10]*re**6)+(8*9*10*11*popt[11]*re**7)
+
         gn[5] = (2*3*4*5*popt[5])+(2*3*4*5*6*popt[6]*re)+(3*4*5*6*7*popt[7]*re**2)+\
         (4*5*6*7*8*popt[8]*re**3)+(5*6*7*8*9*popt[9]*re**4)+(6*7*8*9*10*      \
-        popt[10]*re**5)+(7*8*9*10*11*popt[11]*re**6) 
-        
+        popt[10]*re**5)+(7*8*9*10*11*popt[11]*re**6)
+
         gn[6] = (2*3*4*5*6*popt[6])+(2*3*4*5*6*7*popt[7]*re)+(3*4*5*6*7*8*popt[8]* \
         re**2)+(4*5*6*7*8*9*popt[9]*re**3)+(5*6*7*8*9*10*popt[10]*re**4)+(6*7*\
         8*9*10*11*popt[11]*re**5)
-           
+
         gn[7] = (2*3*4*5*6*7*popt[7])+(2*3*4*5*6*7*8*popt[8]*re)+(3*4*5*6*7*8*9*   \
         popt[9]*re**2)+(4*5*6*7*8*9*10*popt[10]*re**3)+(5*6*7*8*9*10*11*      \
         popt[11]*re**4)
@@ -505,41 +510,41 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         # Derivatives of parameter at re
         print("\nDerivatives of parameter at re")
         for i in range(len(gn)):
-            print ("g{0} = {1}".format(i, gn[i]) )
+            print ("g{0} = {1}".format(i, round(gn[i], 8)))
 
         # ----------------------------------------------------------------------------
-        expn=np.zeros(shape=(len(distance),8))
+        expn = np.zeros(shape = (len(distance), 8))
         r_re = distance-re
-        
-        expn[:,0] = np.full(len(distance),gn[0])
-        expn[:,1] = np.fromiter( (gn[0]+gn[1]*r_re[x] for x in range(         \
+
+        expn[:, 0] = np.full(len(distance),gn[0])
+        expn[:, 1] = np.fromiter((gn[0]+gn[1]*r_re[x] for x in range(         \
         len(distance))), dtype="float")
-        
-        expn[:,2] = np.fromiter( (gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2) for\
-        x in range(len(distance))) , dtype="float")
-        
-        expn[:,3] = np.fromiter( (gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
-        (1/6)*gn[3]*(r_re[x]**3) for x in range(len(distance))) , dtype="float")
-        
-        expn[:,4] = np.fromiter( (gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
+
+        expn[:, 2] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2) for\
+        x in range(len(distance))), dtype="float")
+
+        expn[:, 3] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
+        (1/6)*gn[3]*(r_re[x]**3) for x in range(len(distance))), dtype="float")
+
+        expn[:, 4] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4) for x in range(len \
         (distance))) , dtype="float")
-        
-        expn[:,5] = np.fromiter( (gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
+
+        expn[:, 5] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
-        (r_re[x]**5) for x in range(len(distance))) , dtype="float")
-        
-        expn[:,6] = np.fromiter( (gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
+        (r_re[x]**5) for x in range(len(distance))), dtype="float")
+
+        expn[:, 6] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
         (r_re[x]**5)+(1/720)*gn[6]*(r_re[x]**6) for x in range(len(distance)))\
         , dtype="float")
-        
-        expn[:,7] = np.fromiter( (gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
+
+        expn[:, 7] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
         (r_re[x]**5)+(1/720)*gn[6]*(r_re[x]**6)+(1/5040)*gn[7]*(r_re[x]**7)   \
-        for x in range(len(distance))) , dtype="float")
+        for x in range(len(distance))), dtype="float")
 
-        
+
     # ----------------------------------------------------------------------------
     # Computation of the matrix element for the Taylor series expansions of
     #   the parameter using the expn array(as columns)
@@ -547,61 +552,102 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         # truncate the rwave, psi1 and psi2, r=0.5--3.0 a.u.
         rwave = rwave[:701]
         rwave = rwave[75:]
-        
+
         psi1 = psi1[:701]
         psi1 = psi1[75:]
-        
+
         psi2 = psi2[:701]
         psi2 = psi2[75:]
-        
-        parameter_ME=np.zeros(8)    # array to keep the matrix elements
-        param_sc=np.zeros(len(rwave))   # interpolation of the expn to rwave
-        
+
+        parameter_ME = np.zeros(8)    # array to keep the matrix elements
+        param_sc = np.zeros(len(rwave))   # interpolation of the expn to rwave
+
         # generate interpolation of the expn to rwave using cubic spline
         for i in range(len(parameter_ME)):
-            param=np.zeros(len(distance))
-            param=expn[:,i]
-            
-            der2 = fd_ends(distance, param)
-            secarray2 = spline(distance,param,der2[0],der2[1])
-            
-            for j in range(0,len(rwave)):
-                param_sc[j] = splint(distance,param,secarray2,rwave[j])
-            
-            res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
-            parameter_ME[i] = res[0]
-            
-            
-        print("\nMatrix elements of parameter using Taylor series \n  expansions using n derivatives")    
-        for i in range(len( parameter_ME )):
-            print ("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator,i ,v, J,  parameter_ME[i]) )            
-            
-        # ----------------------------------------------------------------------------
-        
-        # OPTIONAL PLOTTING : USING  MATPLOTLIB        
-        plt.figure(0)
-        residual = parameter-poly11(distance,*popt)
-        plt.plot(distance, poly11(distance, *popt),linewidth=7.0)
-        plt.plot(distance, parameter)
-        
-        
-        plt.figure(1)
-        plt.plot(distance,residual)
-        
-        
-        plt.figure(2)
-        plt.plot(distance, expn[:,0])
-        plt.plot(distance, expn[:,1])
-        plt.plot(distance, expn[:,2])
-        plt.plot(distance, expn[:,3])
-        plt.plot(distance, expn[:,4])
-        plt.plot(distance, expn[:,5])
-        plt.plot(distance, expn[:,6])
-        plt.plot(distance, expn[:,7])
-        plt.plot(distance, parameter, color='black')
-        
+            param = np.zeros(len(distance))
+            param = expn[:, i]
 
-        
+            der2 = fd_ends(distance, param)
+            secarray2 = spline(distance, param, der2[0], der2[1])
+
+            for j in range(0, len(rwave)):
+                param_sc[j] = splint(distance, param, secarray2, rwave[j])
+
+            res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+            parameter_ME[i] = round(res[0], 6)
+
+        print("\nMatrix elements of parameter using Taylor series \n  expansions using n derivatives")
+        for i in range(len(parameter_ME)):
+            print ("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator,i ,v, J, parameter_ME[i]))
+
+
+        # compute the matrix element for the original parameter array (no approximation)
+        der2 = fd_ends(distance, parameter)
+        secarray2 = spline(distance, parameter, der2[0], der2[1])
+        for j in range(0, len(rwave)):
+            param_sc[j] = splint(distance, parameter, secarray2, rwave[j])
+
+        res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+        parameter_trueME = res[0]
+
+        print ("<psi_{0},{1}| {2}(infty) |psi_{3},{4}> = {5}".format(v, J, operator, v, J, round(parameter_trueME, 6)))
+        print("-------------------------------------------------------------------")
+
         # ----------------------------------------------------------------------------
-        
-compute("H2",0,0,500.5,"nm","g")
+
+        # OPTIONAL PLOTTING : USING  MATPLOTLIB
+        plot = 1    # change value to 1 to enable plotting
+
+        if plot == 1:
+
+            import matplotlib.pyplot as plt
+            from matplotlib.backends.backend_pdf import PdfPages
+
+            plt.figure(0)
+            plt.title('Fitting of the parameter using polynomial function')
+            plt.plot(distance, parameter, linewidth=5)
+            plt.plot(distance, poly11(distance, *popt), linewidth=2.0)
+            plt.xlabel('Inter-nuclear distance [a.u.]')
+            plt.ylabel('{0}, {1} {2} {3}'.format(name, wavelength, wavelength_unit, mol))
+            plt.grid(True)
+            plt.legend(('parameter', 'polynomial fit'), loc='upper left')
+            txt = ("*Generated from 'polDerivative.py' on the GitHub Repository: H2-PolarizabilityDerivatives")
+            plt.text(0.05, -3.1, txt, fontsize=7, wrap=True)
+
+            residual = parameter-poly11(distance, *popt)
+            plt.figure(1)
+            plt.title('Residual of the fit')
+            plt.plot(distance, residual, label="residual")
+            plt.xlabel('Inter-nuclear distance [a.u.]')
+            plt.ylabel('residual')
+            plt.grid(True)
+            plt.legend(loc='upper left')
+            plt.text(0.05, -0.000035, txt, fontsize=7, wrap=True)
+
+            plt.figure(2)
+            plt.title('Taylor series expansions of parameter at re using n-order derivatives')
+            plt.plot(distance, expn[:, 0], label="0")
+            plt.plot(distance, expn[:, 1], label="1")
+            plt.plot(distance, expn[:, 2], label="2")
+            plt.plot(distance, expn[:, 3], label="3")
+            plt.plot(distance, expn[:, 4], label="4")
+            plt.plot(distance, expn[:, 5], label="5")
+            plt.plot(distance, expn[:, 6], label="6")
+            plt.plot(distance, expn[:, 7], label="7")
+            plt.plot(distance, parameter, color='black', label="original")
+            plt.xlabel('Inter-nuclear distance [a.u.]')
+            plt.ylabel('{0}, {1} {2} {3}'.format(name, wavelength , wavelength_unit , mol))
+            plt.grid(True)
+            plt.legend(  loc='upper left')
+            plt.text(0.05, -6.85, txt, fontsize=7, wrap=True)
+
+            # exporting the plots as a PDF file
+            pdf = PdfPages('output.pdf')
+            nfig = plt.gcf().number
+            #print(nfig)
+
+            for fig in range(nfig+1): #loop over plots
+                pdf.savefig(fig, bbox_inches="tight")
+            pdf.close()
+
+        # ----------------------------------------------------------------------------
