@@ -1,5 +1,6 @@
 '''# Purpose : Load the matrix containing polarizability and wavefunctions, interpolate the
-# polarizability invariant if needed, determine the deriavtive of the invariant at re and finally, compute the respective matrix elements.'''
+# polarizability invariant if needed, determine the deriavtive of the invariant at re and finally,
+# compute the respective matrix elements.'''
 
 # Load necessary modules
 import sys
@@ -84,34 +85,35 @@ def spline(x, y, yp1, ypn):
     p = 0.0
     sig = 0.0
 
-    if yp1 > 1e30 :     # lower boundar condition 'natural'
+    if yp1 > 1e30:     # lower boundar condition 'natural'
         y2[0] = 0.0
-        u[0]  = 0.0
-    else :              # specified first derivative
+        u[0] = 0.0
+    else:              # specified first derivative
         y2[0] = -0.5
-        u[0]=(3/(x[1]-x[0])) * ( ((y[1]-y[0])/ (x[1]-x[0])) - yp1)
+        u[0] = (3/(x[1]-x[0])) * (((y[1]-y[0])/ (x[1]-x[0])) - yp1)
 
-    for i in range(1,n-1) :     #       Decomposition loop of tridiagonal algorithm. y2 and u are temporary.
+    for i in range(1, n-1):     # Decomposition loop of tridiagonal algorithm. y2 and u are temporary
         sig = (x[i]-x[i-1])/(x[i+1]-x[i-1])
         p = (sig * y2[i-1]) + 2.0
         y2[i] = (sig-1.0)/p
-        u[i] = ((6.0*((y[i+1]-y[i])/(x[i+1]-x[i])-(y[i]-y[i-1]) / (x[i]-x[i-1]))/(x[i+1]-x[i-1])-sig*u[i-1])/p)
+        u[i] = ((6.0*((y[i+1]-y[i])/(x[i+1]-x[i])-(y[i]-y[i-1]) / (x[i]-x[i-1]))/(x[i+1]-x[i-1])-  \
+               sig*u[i-1])/p)
         # print("first loop:",i)
 
-    if ypn > 1e30 :     # upper boundary condition 'natural'
-        qn=0.0
-        un=0.0
-    else :              # specified first derivative
-        qn=0.5
-        un = (3.0 /(x[n-1]-x[n-2]))*(ypn-((y[n-1]-y[n-2])/(x[n-1]-x[n-2])) )
+    if ypn > 1e30:     # upper boundary condition 'natural'
+        qn = 0.0
+        un = 0.0
+    else:              # specified first derivative
+        qn = 0.5
+        un = (3.0 /(x[n-1]-x[n-2]))*(ypn-((y[n-1]-y[n-2])/(x[n-1]-x[n-2])))
 
-    y2[n-1]=(un-qn*u[n-2])/(qn*y2[n-2]+1.0)
+    y2[n-1] = (un-qn*u[n-2])/(qn*y2[n-2]+1.0)
 
-    for k in range(n-2,-1,-1):           # from second last point to the second point
-        y2[k]=y2[k]*y2[k+1]+u[k]        # backsubstitution loop of tridiagonal algorithm
+    for k in range(n-2, -1, -1):           # from second last point to the second point
+        y2[k] = y2[k]*y2[k+1]+u[k]        # backsubstitution loop of tridiagonal algorithm
         # print("loop 2 :",k)
 
-    return(y2)
+    return y2
 
 
 #************************************************************************
@@ -127,9 +129,9 @@ def splint(xa, ya, y2a, x):
         x       =       new x axis, scalar
     '''
 
-    nxa=len(xa)
-    nya=len(ya)
-    ny2a=len(y2a)
+    nxa = len(xa)
+    nya = len(ya)
+    ny2a = len(y2a)
 
     if (nxa != nya or nxa != ny2a or nya != ny2a):
         print("Error : xa or ya or y2a have incorrect dimension(s).")
@@ -143,26 +145,26 @@ def splint(xa, ya, y2a, x):
     h = 0.0
     element = 0.0
 
-    while ((khi-klo) > 1) :
+    while ((khi-klo) > 1):
         k = int((khi+klo)/2)
         element = xa[k]
 #        print(element,xa[k],k,x)
-        if (element > x) :
+        if (element > x):
             khi = k
         else:
             klo = k
 
     h = xa[khi] - xa[klo]
 
-    if h == 0 :
+    if h == 0:
         print("Error : Bad xa input in splint")
         quit()
 
     a = (xa[khi]-x)/h
     b = (x-xa[klo])/h
-    y = a*ya[klo]+b*ya[khi] + (( (a**3)-a)*y2a[klo]+( (b**3)-b)*y2a[khi])*(h**2)/6.0
+    y = a*ya[klo]+b*ya[khi] + (((a**3)-a)*y2a[klo]+((b**3)-b)*y2a[khi])*(h**2)/6.0
 
-    return(y) #returns the interpolated value
+    return y #returns the interpolated value
 
 #************************************************************************
 
@@ -189,10 +191,11 @@ def computeInt(rwave, psi1, psi2, y_parameter, rMin, rMax):
 
     # function defining the integrand which uses the spline coef array to give interpolated values
     def integrand_ME(xpoint):
+        '''integrand for the quadrature'''
         result = splint(rwave, product, secarray2, xpoint)
         return result
 
-    res = integrate.quadrature( integrand_ME, rMin, rMax, tol=1.0e-6, vec_func=False, maxiter=1000)
+    res = integrate.quadrature(integrand_ME, rMin, rMax, tol=1.0e-6, vec_func=False, maxiter=1000)
     return res
     # output is a tuple, [0] = integral result, [1]=error
 
@@ -212,15 +215,15 @@ static_zz = np.loadtxt("./data/static_zz.txt")
 # check size of the arrays -------------------------------
 #print("Dimensions of isotropy matrix :",alpha_xx.shape)
 #print("Dimensions of anisotropy matrix :",alpha_zz.shape)
-if not(alpha_xx.shape ==  alpha_zz.shape  or len(omega)==alpha_xx.shape[0] or len(static_xx) == len(distance)
-      or  len(static_zz) == len(distance) ):
+if not(alpha_xx.shape == alpha_zz.shape or len(omega) == alpha_xx.shape[0] or len(static_xx) == len(distance)
+      or  len(static_zz) == len(distance)):
     print("Dimension check on polarizability data matrices or wavelength file failed.")
     quit()
-else :
+else:
     print("Polarizability data dimension checked.")
     print("\n")
-    omega_nm=(1e7/(omega*219474.6313702000))
-    omega_A=(omega_nm*10)
+    omega_nm = (1e7/(omega*219474.6313702000))
+    omega_A = (omega_nm*10)
 
 
 
@@ -239,8 +242,8 @@ else :
     print('\t\t\t          for  Angstrom          use "a" or "A"  ')
     print('\t\t\t          if static property is asked then this parameter can be any of the three ')
     print("\t\tAvailable wavelength range: {0} - {1} Hartree;\n   \t\t\t\t\t    {2} - {3} nm; \n   \t\t\t\t\t    {4} - {5} Angstrom".
-         format(round(omega[0], 4),round(omega[-1], 4),round(omega_nm[0], 4),round
-         (omega_nm[-1], 4),round(omega_A[0], 4),round(omega_A[-1], 4)))
+         format(round(omega[0], 4), round(omega[-1], 4), round(omega_nm[0], 4), round
+         (omega_nm[-1], 4), round(omega_A[0], 4), round(omega_A[-1], 4)))
     print('\t\toperator	= alpha(perpendicular) = alpha_xx given by "xx" or "x" ')
     print('\t\t\t          alpha(parallel) = alpha_xx given by "zz" or "z" ')
     print('\t\t\t          isotropy or mean polarizability given by "iso" or "mp" or "mean" ')
@@ -280,7 +283,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     d = {'output':[0]}
     #----------------------------------------------------------------
     # interpolation function defined here and is used later.
-    def interpolate2D_common(input2D,originalx,finalx):
+    def interpolate2D_common(input2D, originalx, finalx):
         inputSize = input2D.shape
         tempx = np.zeros((len(originalx), 1))
         tempx[:, 0] = originalx
@@ -340,29 +343,29 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     # STATIC
     if (wavelength == "static" or wavelength == "Static" or wavelength == "s"):
         #print("\tStatic")
-        n=0
+        n = 0
         if (operator == "mean" or operator == "mp" or operator == "iso"):
-            param=isotropy_static
-            name=["isotropy (static)"]
+            param = isotropy_static
+            name = ["isotropy (static)"]
             n = 1
         elif (operator == "diff" or operator == "g" or operator == "aniso"):
-            param=anisotropy_static
-            name=["anisotropy (static)"]
+            param = anisotropy_static
+            name = ["anisotropy (static)"]
             n = 1
-        else :
+        else:
             print("Error : Operator not correctly specified. Exiting ")
             quit()
 
     # DYNAMIC
-    elif (isinstance(wavelength, (int,float))):
-        wv=float(wavelength) # entered wavelength is a number
+    elif (isinstance(wavelength, (int, float))):
+        wv = float(wavelength) # entered wavelength is a number
 
         if (wavelength_unit == "h" or wavelength_unit == "H"):
-            omegaFinal=(1e7/(wv*219474.6313702000))
+            omegaFinal = (1e7/(wv*219474.6313702000))
         elif (wavelength_unit == "n" or wavelength_unit == "nm"):
-            omegaFinal=wv
+            omegaFinal = wv
         elif (wavelength_unit == "a" or wavelength_unit == "A"):
-            omegaFinal=(wv/10)
+            omegaFinal = (wv/10)
         elif not (wavelength_unit == "h" or wavelength_unit == "H" or wavelength_unit == "n" or wavelength_unit == "nm"
                   or wavelength_unit == "a" or wavelength_unit == "A"):
             print("Message : Default unit of nm will be used.")
@@ -371,23 +374,23 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         if omegaFinal < omega_nm[0] or omegaFinal > omega_nm[-1]:
             sys.exit("Error : Requested wavelength is out of range. Exiting ")
 
-        print("Selected wavelength in nanometer : {0}, Hartree : {1}".format(round(omegaFinal,6) , round((1e7/(omegaFinal*219474.63137020)),6) ) )
+        print("Selected wavelength in nanometer : {0}, Hartree : {1}".format(round(omegaFinal, 6), round((1e7/(omegaFinal*219474.63137020)), 6)))
 
-        n=0
+        n = 0
 
         if (operator == "mean" or operator == "mp" or operator == "iso"):
             param = isotropy
             name = ["isotropy"]
-            n=1
+            n = 1
         elif (operator == "diff" or operator == "g" or operator == "aniso"):
             param = anisotropy
             name = ["anisotropy"]
-            n=1
+            n = 1
         else:
             print("Error : Operator not correctly specified. Exiting")
             quit()
 
-    elif not (wavelength == "static" or wavelength == "s" or isinstance(wavelength, (int,float))):
+    elif not (wavelength == "static" or wavelength == "s" or isinstance(wavelength, (int, float))):
         print('Error : Incorrect specification of wavelength. Use number for dynamic property and "s" or "static" for static. Exiting')
         quit()
 
@@ -455,8 +458,8 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
 
         # fit coeffcients
         print("\nFit coefficients, parameter vs distance, fit using poly11")
-        for i in range(len(popt)):
-            print ("c{0} = {1}".format(i, round(popt[i], 10)))
+        for j in range(len(popt)):
+            print("c{0} = {1}".format(j, round(popt[j], 10)))
 
         # covariance of the fit coefficients
         #print(pcov)
@@ -471,10 +474,10 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     #  g0 is the interpolated value of parameter at re
     #  g1,.. g7 are obtained using the coeffs of polynomial fit
 
-        gn=np.zeros(8)
+        gn = np.zeros(8)
 
         der2 = fd_ends(distance, parameter)
-        secarray2 = spline(distance,parameter,der2[0],der2[1])
+        secarray2 = spline(distance, parameter, der2[0], der2[1])
 
         gn[0] = splint(distance, parameter, secarray2, re)
 
@@ -509,14 +512,14 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
 
         # Derivatives of parameter at re
         print("\nDerivatives of parameter at re")
-        for i in range(len(gn)):
-            print ("g{0} = {1}".format(i, round(gn[i], 8)))
+        for j in range(len(gn)):
+            print("g{0} = {1}".format(j, round(gn[j], 8)))
 
         # ----------------------------------------------------------------------------
-        expn = np.zeros(shape = (len(distance), 8))
+        expn = np.zeros(shape=(len(distance), 8))
         r_re = distance-re
 
-        expn[:, 0] = np.full(len(distance),gn[0])
+        expn[:, 0] = np.full(len(distance), gn[0])
         expn[:, 1] = np.fromiter((gn[0]+gn[1]*r_re[x] for x in range(         \
         len(distance))), dtype="float")
 
@@ -528,7 +531,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
 
         expn[:, 4] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4) for x in range(len \
-        (distance))) , dtype="float")
+        (distance))), dtype="float")
 
         expn[:, 5] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
         (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
@@ -563,22 +566,22 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         param_sc = np.zeros(len(rwave))   # interpolation of the expn to rwave
 
         # generate interpolation of the expn to rwave using cubic spline
-        for i in range(len(parameter_ME)):
+        for j in range(len(parameter_ME)):
             param = np.zeros(len(distance))
-            param = expn[:, i]
+            param = expn[:, j]
 
             der2 = fd_ends(distance, param)
             secarray2 = spline(distance, param, der2[0], der2[1])
 
-            for j in range(0, len(rwave)):
-                param_sc[j] = splint(distance, param, secarray2, rwave[j])
+            for k in range(0, len(rwave)):
+                param_sc[k] = splint(distance, param, secarray2, rwave[k])
 
             res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
-            parameter_ME[i] = round(res[0], 6)
+            parameter_ME[j] = round(res[0], 6)
 
         print("\nMatrix elements of parameter using Taylor series \n  expansions using n derivatives")
-        for i in range(len(parameter_ME)):
-            print ("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator,i ,v, J, parameter_ME[i]))
+        for j in range(len(parameter_ME)):
+            print("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator, j, v, J, parameter_ME[j]))
 
 
         # compute the matrix element for the original parameter array (no approximation)
@@ -590,7 +593,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
         parameter_trueME = res[0]
 
-        print ("<psi_{0},{1}| {2}(infty) |psi_{3},{4}> = {5}".format(v, J, operator, v, J, round(parameter_trueME, 6)))
+        print("<psi_{0},{1}| {2}(infty) |psi_{3},{4}> = {5}".format(v, J, operator, v, J, round(parameter_trueME, 6)))
         print("-------------------------------------------------------------------")
 
         # ----------------------------------------------------------------------------
@@ -608,11 +611,12 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.plot(distance, parameter, linewidth=5)
             plt.plot(distance, poly11(distance, *popt), linewidth=2.0)
             plt.xlabel('Inter-nuclear distance [a.u.]')
-            plt.ylabel('{0}, {1} {2} {3}'.format(name, wavelength, wavelength_unit, mol))
+            plt.ylabel('{0}, {1} {2} {3}  [a.u.]'.format(name, wavelength, wavelength_unit, mol))
             plt.grid(True)
             plt.legend(('parameter', 'polynomial fit'), loc='upper left')
-            txt = ("*Generated from 'polDerivative.py' on the GitHub Repository: H2-PolarizabilityDerivatives")
-            plt.text(0.05, -3.1, txt, fontsize=7, wrap=True)
+            txt = ("*Generated from 'polDerivative.py' on the \nGitHub Repository: H2-PolarizabilityDerivatives")
+            plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
+            #plt.text(0.05, -3.1, txt, fontsize=7, wrap=True)
 
             residual = parameter-poly11(distance, *popt)
             plt.figure(1)
@@ -622,7 +626,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.ylabel('residual')
             plt.grid(True)
             plt.legend(loc='upper left')
-            plt.text(0.05, -0.000035, txt, fontsize=7, wrap=True)
+            plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
 
             plt.figure(2)
             plt.title('Taylor series expansions of parameter at re using n-order derivatives')
@@ -636,10 +640,10 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.plot(distance, expn[:, 7], label="7")
             plt.plot(distance, parameter, color='black', label="original")
             plt.xlabel('Inter-nuclear distance [a.u.]')
-            plt.ylabel('{0}, {1} {2} {3}'.format(name, wavelength , wavelength_unit , mol))
+            plt.ylabel('{0}, {1} {2} {3}  [a.u.]'.format(name, wavelength, wavelength_unit, mol))
             plt.grid(True)
-            plt.legend(  loc='upper left')
-            plt.text(0.05, -6.85, txt, fontsize=7, wrap=True)
+            plt.legend(loc='upper left')
+            plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
 
             # exporting the plots as a PDF file
             pdf = PdfPages('output.pdf')
