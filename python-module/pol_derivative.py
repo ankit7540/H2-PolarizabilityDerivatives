@@ -1,6 +1,6 @@
 '''# Purpose : Load the matrix containing polarizability and wavefunctions, interpolate the
-# polarizability invariant if needed, determine the deriavtive of the invariant at re and finally,
-# compute the respective matrix elements.'''
+# polarizability invariant if needed, determine the derivtive of the invariant at r_e and finally,
+# compute the respective matrix elements using Taylor series expansions of parameter at r_e.'''
 
 # Load necessary modules
 import sys
@@ -170,8 +170,17 @@ def splint(xa, ya, y2a, x):
 
 # Define the fitting function : polynomial of degree 11
 def poly11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
+    '''Polynomial function without scaling the x. Used for plotting'''
     return c0+(c1*x)+c2*(x**2)+c3*(x**3)+c4*(x**4)+c5*(x**5)+c6*(x**6)+c7*(x**\
     7)+c8*(x**8)+c9*(x**9)+c10*(x**10)+c11*(x**11)
+
+#************************************************************************
+
+# Define the fitting function : scaled polynomial of degree 11
+def poly11_sc(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
+    '''Polynomial function with scaled x. Ensures better numerical accuracy'''
+    return c0+(c1*x/3.0)+c2*((x/3.0)**2)+c3*((x/3.0)**3)+c4*((x/3.0)**4)+c5*((x/3.0)**5)+c6*\
+    ((x/3.0)**6)+c7*((x/3.0)**7)+c8*((x/3.0)**8)+c9*((x/3.0)**9)+c10*((x/3.0)**10)+c11*((x/3.0)**11)
 
 #************************************************************************
 
@@ -180,7 +189,7 @@ def poly11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
 
 # y_parameter should be already interpolated to rwave to that the product may be computed
 
-def computeInt(rwave, psi1, psi2, y_parameter, rMin, rMax):
+def compute_int(rwave, psi1, psi2, y_parameter, rMin, rMax):
     p1 = np.multiply(psi1, psi2)
     p2 = np.multiply(p1, rwave)
     p3 = np.multiply(p2, rwave)
@@ -425,7 +434,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             wavelength_unit = ""
 
         print("-------------------------------------------------------------------")
-        print("\nAnalysis for the derivative of the parameter at re defined by v,J")
+        print("Analysis for the derivative of the parameter at re defined by v,J")
         print("-------------------------------------------------------------------")
 
         print("Molecule = {0}". format(mol))
@@ -434,13 +443,13 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         print("Rovibrational state : v={0}, J={1}". format(v, J))
 
 
-    # Step 4 : Compute the expectation value of the inter-nuclear distance -------
-        result = computeInt(rwave, psi1, psi2, rwave, 0.5, 3.0)
+    # Step 2 : Compute the expectation value of the inter-nuclear distance -------
+        result = compute_int(rwave, psi1, psi2, rwave, 0.5, 3.0)
         re = result[0]
-        print("Expectation value of inter-nuclear distance, re = {0} a.u.". format(round(re, 6)))
+        print("Expectation value of inter-nuclear distance, r_e = {0} a.u.". format(round(re, 6)))
     # ----------------------------------------------------------------------------
 
-	# Step 2 : Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
+	# Step 3 : Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
         distance = distance[9:]
         distance = distance[:101]
 
@@ -448,24 +457,25 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         parameter = parameter[:101]
         parameter = np.reshape(parameter, len(parameter))
 
-        #print("first point {0}, last point {1} " .format(round(distance[0],9) \
+        #print("distance array: first point={0}, last point={1} " .format(round(distance[0],9) \
         #, round(distance[-1],9)  ))
-        #print("first point {0}, last point {1} " .format(np.round(parameter[0]\
+        #print("parameter array: first point={0}, last point={1} " .format(np.round(parameter[0]\
         #,9) , np.round(parameter[-1],9)  ))
 
-    # Step 3 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
-        popt, pcov = curve_fit(poly11, distance, parameter)
+    # Step 4 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
+        popt_sc, pcov_sc = curve_fit(poly11_sc, distance, parameter)
+
+        popt = np.zeros(12)
 
         # fit coeffcients
-        print("\nFit coefficients, parameter vs distance, fit using poly11")
-        for j in range(len(popt)):
-            print("c{0} = {1}".format(j, round(popt[j], 10)))
+        print("\n(1.) Fit coefficients (scaled back using 3^{n})\nparameter vs distance was fit using poly11_sc function")
+        for j in range(len(popt_sc)):
+            print("c{0} = {1}".format(j, round(popt_sc[j]/(3.0**j), 10)))
+            popt[j] = popt_sc[j]/(3.0**j)    # rescale the fit coefficients
 
         # covariance of the fit coefficients
         #print(pcov)
     #-----------------------------------------------------------------------------
-
-
 
 
     # Step 5 : Obtain the numerical value of the derivative at re ----------------
@@ -511,11 +521,16 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         popt[11]*re**4)
 
         # Derivatives of parameter at re
-        print("\nDerivatives of parameter at re")
+        print("\n(2.) Derivatives of parameter at r_e")
         for j in range(len(gn)):
             print("g{0} = {1}".format(j, round(gn[j], 8)))
 
         # ----------------------------------------------------------------------------
+        # ----------------------------------------------------------------------------
+
+        # Generate Taylor series expansion of parameter at r_e using the derivatives at r_e
+        #    designated at g0, g1, .. gn computed above
+
         expn = np.zeros(shape=(len(distance), 8))
         r_re = distance-re
 
@@ -547,12 +562,11 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         (r_re[x]**5)+(1/720)*gn[6]*(r_re[x]**6)+(1/5040)*gn[7]*(r_re[x]**7)   \
         for x in range(len(distance))), dtype="float")
 
-
     # ----------------------------------------------------------------------------
     # Computation of the matrix element for the Taylor series expansions of
     #   the parameter using the expn array(as columns)
 
-        # truncate the rwave, psi1 and psi2, r=0.5--3.0 a.u.
+        # truncate the rwave, psi1 and psi2 to r=0.5--3.0 a.u.
         rwave = rwave[:701]
         rwave = rwave[75:]
 
@@ -576,12 +590,12 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             for k in range(0, len(rwave)):
                 param_sc[k] = splint(distance, param, secarray2, rwave[k])
 
-            res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
-            parameter_ME[j] = round(res[0], 6)
+            res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+            parameter_ME[j] = res[0]
 
-        print("\nMatrix elements of parameter using Taylor series \n  expansions using n derivatives")
+        print("\n(3.) Matrix elements of parameter using Taylor series \n  expansions (at r_e) using n^{th} order derivatives")
         for j in range(len(parameter_ME)):
-            print("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator, j, v, J, parameter_ME[j]))
+            print("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator, j, v, J, round(parameter_ME[j], 6)))
 
 
         # compute the matrix element for the original parameter array (no approximation)
@@ -590,7 +604,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         for j in range(0, len(rwave)):
             param_sc[j] = splint(distance, parameter, secarray2, rwave[j])
 
-        res = computeInt(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+        res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
         parameter_trueME = res[0]
 
         print("<psi_{0},{1}| {2}(infty) |psi_{3},{4}> = {5}".format(v, J, operator, v, J, round(parameter_trueME, 6)))
@@ -607,6 +621,11 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             from matplotlib.backends.backend_pdf import PdfPages
 
             plt.figure(0)
+
+            txt = ("*Generated from 'polDerivative.py' on the \nGitHub Repository: H2-PolarizabilityDerivatives")
+            subtxt = "v={0}, J={1}\nr$_{{e}}$={2} a.u.". format(v, J, round(re, 6))
+            print(txt, subtxt)
+
             plt.title('Fitting of the parameter using polynomial function')
             plt.plot(distance, parameter, linewidth=5)
             plt.plot(distance, poly11(distance, *popt), linewidth=2.0)
@@ -614,7 +633,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.ylabel('{0}, {1} {2} {3}  [a.u.]'.format(name, wavelength, wavelength_unit, mol))
             plt.grid(True)
             plt.legend(('parameter', 'polynomial fit'), loc='upper left')
-            txt = ("*Generated from 'polDerivative.py' on the \nGitHub Repository: H2-PolarizabilityDerivatives")
+
             plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
             #plt.text(0.05, -3.1, txt, fontsize=7, wrap=True)
 
@@ -629,7 +648,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
 
             plt.figure(2)
-            plt.title('Taylor series expansions of parameter at re using n-order derivatives')
+            plt.title('Taylor series expansions of parameter at $r_{e}$ using $n^{th}$-order derivatives')
             plt.plot(distance, expn[:, 0], label="0")
             plt.plot(distance, expn[:, 1], label="1")
             plt.plot(distance, expn[:, 2], label="2")
@@ -644,6 +663,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.grid(True)
             plt.legend(loc='upper left')
             plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
+            plt.text(0.725, 0.00001, subtxt, fontsize=7, color='navy', transform=plt.gcf().transFigure)
 
             # exporting the plots as a PDF file
             pdf = PdfPages('output.pdf')
@@ -655,3 +675,4 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             pdf.close()
 
         # ----------------------------------------------------------------------------
+compute("H2", 0, 0, 514.5, "nm", "g")
