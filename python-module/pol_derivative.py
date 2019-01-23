@@ -237,14 +237,14 @@ else:
 
 
     print("Give  pol_derivative.compute  command with parameters:")
-    print("\trovibME.compute(molecule, v, J, lambda, unit of lambda, operator)")
-    print('\t for example:  rovibME.compute("H2",0,4,488,"n","mp")  ')
-    print('\t\t       rovibME.compute("D2",1,0,"static","n","g")  ')
+    print("\tpol_derivative.compute(molecule, v, J, lambda, unit of lambda, operator)")
+    print('\t for example:  pol_derivative.compute("H2",0,4,488,"n","mp")  ')
+    print('\t\t       pol_derivative.compute("D2",1,0,"static","n","g")  ')
     print("\t\t")
 
     print('\t\tmolecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD" ')
-    print("\t\tv    = vibrational state, v=[0,2]")
-    print("\t\tJ    = rotataional state, J=[0,15]")
+    print("\t\tv    = vibrational state, [0,2]")
+    print("\t\tJ    = rotataional state, [0,15]")
     print('\t\tlambda   = wavelength in Hartree, nm or Angstrom, for static specify "s" or "static" here')
     print('\t\tunit of lambda =  for  Hartree           use "H" or "h"  ')
     print('\t\t\t          for  nanometers        use "n" or "nm" ')
