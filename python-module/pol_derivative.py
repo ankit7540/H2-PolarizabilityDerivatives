@@ -236,14 +236,14 @@ else:
 
 
 
-    print("Give  rovibME.compute  command with parameters:")
-    print("\trovibME.compute(molecule, bra_v, bra_J, ket_v, ket_J, lambda, unit of lambda, operator)")
-    print('\t for example:  rovibME.compute("H2",0,2,0,4,488,"n","mp")  ')
-    print('\t\t       rovibME.compute("D2",1,0,1,0,"static","n","all")  ')
+    print("Give  pol_derivative.compute  command with parameters:")
+    print("\trovibME.compute(molecule, v, J, lambda, unit of lambda, operator)")
+    print('\t for example:  rovibME.compute("H2",0,4,488,"n","mp")  ')
+    print('\t\t       rovibME.compute("D2",1,0,"static","n","g")  ')
     print("\t\t")
 
     print('\t\tmolecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD" ')
-    print("\t\tv    = vibrational state, v=[0,4]")
+    print("\t\tv    = vibrational state, v=[0,2]")
     print("\t\tJ    = rotataional state, J=[0,15]")
     print('\t\tlambda   = wavelength in Hartree, nm or Angstrom, for static specify "s" or "static" here')
     print('\t\tunit of lambda =  for  Hartree           use "H" or "h"  ')
@@ -253,11 +253,8 @@ else:
     print("\t\tAvailable wavelength range: {0} - {1} Hartree;\n   \t\t\t\t\t    {2} - {3} nm; \n   \t\t\t\t\t    {4} - {5} Angstrom".
          format(round(omega[0], 4), round(omega[-1], 4), round(omega_nm[0], 4), round
          (omega_nm[-1], 4), round(omega_A[0], 4), round(omega_A[-1], 4)))
-    print('\t\toperator	= alpha(perpendicular) = alpha_xx given by "xx" or "x" ')
-    print('\t\t\t          alpha(parallel) = alpha_xx given by "zz" or "z" ')
-    print('\t\t\t          isotropy or mean polarizability given by "iso" or "mp" or "mean" ')
+    print('\t\toperator	= isotropy or mean polarizability given by "iso" or "mp" or "mean" ')
     print('\t\t\t          anisotropy or polarizability difference or gamma given by "aniso" or "g"  or "diff" ')
-    print('\t\t\t          for all the above use "all"   or  "All"or "ALL" ')
 
     print("...ready.")
 #********************************************************************
@@ -268,8 +265,8 @@ else:
 def compute(mol, v, J, wavelength, wavelength_unit, operator):
     '''#  parameters:
     # mol  =    molecule (for H2 enter "H2", for D2 enter "D2", for HD enter "HD")
-    # v   =    vibrational state for the bra, v = [0,4]
-    # J   =    rotational state for the bra,  J = [0,15]
+    # v   =    vibrational state,  v = [0,2]
+    # J   =    rotational state, J = [0,15]
     # wavelength =  wavelength ( can be Hartree, nanometers or Angstrom)
     # wavelength_unit = specify unit using the specifier
                                 ( for  Hartree           use "H" or "h"  )
@@ -279,11 +276,9 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     # operator   = property namely alpha_xx, alpha_zz, mean polarizability
                                    (isotropy)[\bar{alpha}], anisotropy[\gamma]
                                    Specify operator using the specifier.
-                                 ( for  alpha_xx = alpha(?)         use "x"     or  "xx"  )
-                                 ( for  alpha_zz          use "z"     or  "zz"  )
                                  ( for  isotropy          use "iso"   or  "mp" or "mean" )
                                  ( for  anisotropy        use "aniso" or  "g"  or "diff" )
-                                 ( for  all the above     use "all"   or  "All"or "ALL"  )
+
 
     This function runs on both Python 2.7x and 3.x
     '''
@@ -331,8 +326,8 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
     Wfn2 = "./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol, v, J)
     r_wave = "./wavefunctions/r_wave.txt"
     #print(Wfn1,Wfn2)
-    if v < 0  or v > 4:
-        print("Error : v value out of range. v = [0,4]. Exiting ")
+    if v < 0  or v > 2:
+        print("Error : v value out of range. v = [0,2]. Exiting ")
         quit()
 
     if J < 0   or J > 15:
@@ -468,7 +463,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         popt = np.zeros(12)
 
         # fit coeffcients
-        print("\n(1.) Fit coefficients (scaled back using 3^{n})\nparameter vs distance was fit using poly11_sc function")
+        print("\n(1.) Fit coefficients (scaled back using 3^{n})\n[parameter vs distance was fit using poly11_sc function]")
         for j in range(len(popt_sc)):
             print("c{0} = {1}".format(j, round(popt_sc[j]/(3.0**j), 10)))
             popt[j] = popt_sc[j]/(3.0**j)    # rescale the fit coefficients
@@ -613,41 +608,47 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         # ----------------------------------------------------------------------------
 
         # OPTIONAL PLOTTING : USING  MATPLOTLIB
-        plot = 1    # change value to 1 to enable plotting
+        plot = 0    # change value to 1 to enable plotting
 
         if plot == 1:
 
             import matplotlib.pyplot as plt
             from matplotlib.backends.backend_pdf import PdfPages
 
-            plt.figure(0)
-
             txt = ("*Generated from 'polDerivative.py' on the \nGitHub Repository: H2-PolarizabilityDerivatives")
-            subtxt = "v={0}, J={1}\nr$_{{e}}$={2} a.u.". format(v, J, round(re, 6))
-            print(txt, subtxt)
+            subtxt = "{0}, v={1}, J={2}\nr$_{{e}}$={3} a.u.". format(mol, v, J, round(re, 6))
 
+            # FIGURE 0 INITIALIZED
+            plt.figure(0)
+            ax0 = plt.axes()
             plt.title('Fitting of the parameter using polynomial function')
             plt.plot(distance, parameter, linewidth=5)
             plt.plot(distance, poly11(distance, *popt), linewidth=2.0)
             plt.xlabel('Inter-nuclear distance [a.u.]')
             plt.ylabel('{0}, {1} {2} {3}  [a.u.]'.format(name, wavelength, wavelength_unit, mol))
             plt.grid(True)
+            ax0.minorticks_on()
             plt.legend(('parameter', 'polynomial fit'), loc='upper left')
+            plt.text(0.05, 0.00001, txt, fontsize=5, color="dimgrey", transform=plt.gcf().transFigure)
 
-            plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
-            #plt.text(0.05, -3.1, txt, fontsize=7, wrap=True)
-
+            # Generate residual
             residual = parameter-poly11(distance, *popt)
+
+            # FIGURE 1 INITIALIZED
             plt.figure(1)
+            ax1 = plt.axes()
             plt.title('Residual of the fit')
             plt.plot(distance, residual, label="residual")
             plt.xlabel('Inter-nuclear distance [a.u.]')
             plt.ylabel('residual')
             plt.grid(True)
             plt.legend(loc='upper left')
-            plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
+            ax1.minorticks_on()
+            plt.text(0.05, 0.00001, txt, fontsize=5, color="dimgrey", transform=plt.gcf().transFigure)
 
+            # FIGURE 2 INITIALIZED
             plt.figure(2)
+            ax2 = plt.axes()
             plt.title('Taylor series expansions of parameter at $r_{e}$ using $n^{th}$-order derivatives')
             plt.plot(distance, expn[:, 0], label="0")
             plt.plot(distance, expn[:, 1], label="1")
@@ -660,19 +661,18 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
             plt.plot(distance, parameter, color='black', label="original")
             plt.xlabel('Inter-nuclear distance [a.u.]')
             plt.ylabel('{0}, {1} {2} {3}  [a.u.]'.format(name, wavelength, wavelength_unit, mol))
+            ax2.minorticks_on()
+            ax2.tick_params(which='minor', right='on')
+            ax2.tick_params(axis='y', labelleft='on', labelright='on')
             plt.grid(True)
             plt.legend(loc='upper left')
-            plt.text(0.05, 0.00001, txt, fontsize=5, transform=plt.gcf().transFigure)
+            plt.text(0.05, 0.00001, txt, fontsize=5, color="dimgrey", transform=plt.gcf().transFigure)
             plt.text(0.725, 0.00001, subtxt, fontsize=7, color='navy', transform=plt.gcf().transFigure)
 
             # exporting the plots as a PDF file
             pdf = PdfPages('output.pdf')
             nfig = plt.gcf().number
-            #print(nfig)
-
             for fig in range(nfig+1): #loop over plots
                 pdf.savefig(fig, bbox_inches="tight")
             pdf.close()
-
         # ----------------------------------------------------------------------------
-compute("H2", 0, 0, 514.5, "nm", "g")
