@@ -14,7 +14,7 @@ Usage
     
     > sys.path.append("..")
      
-2. Import the `pol_derivative` which should be in your current folder.
+2. Import the `pol_derivative` which should be in your current folder. Directly execute the following command when using Python3.
     > import pol_derivative
 3. If all requirements are met the following output should be produced.
  ```
@@ -48,7 +48,7 @@ Give  pol_derivative.compute  command with parameters:
     - J   =    rotational state for the bra,  Jl = [0,15]
     - wavelength =  wavelength within the specified range ( 0.25 - 0.0345 Hartree;  182.2534 - 1320.6768  nm;  1822.5341 - 13206.7688  Angstrom ). Specify unit accordingly in the next parameter. If static polarizability is needed enter "static" or "s" here.
     - wavelength_unit = specify unit using the specifier, ( for  Hartree use "H" or "h" , for  nanometers use "n" or "nm" , for  Angstrom use "a" or "A"  )
-    - operator   = property namely alpha_xx, alpha_zz, mean polarizability (isotropy) and anisotropy. Specify operator using the specifier. ( For  alpha_xx  use "x"     or  "xx" , for  alpha_zz  use "z"     or  "zz" , for  isotropy  use "iso"   or  "mp" or "mean" , for  anisotropy use "aniso" or  "g"  or "diff" and for  all the above 4 properties  use "all"   or  "ALL" .
+    - operator   = property namely mean polarizability (isotropy) and anisotropy. Specify this  using the specifier. ( For  isotropy  use "iso"   or  "mp" or "mean" , for  anisotropy use "aniso" or  "g"  or "diff".
     
 
 **Examples**
@@ -113,7 +113,7 @@ g7 = 37.29035527
 - Analysis of mean polarizability (300 nm) for D<sub>2</sub> at v=2, J=11.
 
 ```
-pol_derivative.compute("D2", 2, 11, 300, "nm", "mp")
+pol_derivative.compute("D2", 2, 11, 300, "nm", "mp")⏎
 Selected wavelength in nanometer : 300.0, Hartree : 0.151878
 -------------------------------------------------------------------
 Analysis for the derivative of the parameter at re defined by v,J
