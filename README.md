@@ -1,4 +1,4 @@
-# H2-PolarizabilityDerivatives <under construction>
+# H2-PolarizabilityDerivatives : under progress
 Set of data on the invariants of polarizability (mean polarizability and anisotropy) with programs for obtaining the derivatives of these invariants (for H<sub>2</sub>, HD and D<sub>2</sub>) for specific inter-nuclear distance defined by rovibrational wavefunction for some state.
 
 
