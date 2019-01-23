@@ -30,11 +30,17 @@ The definite integral calculation is usually accurate to ~1e-6 or better. Howeve
 ---
 Some matrix elements computed may have -ve sign which arises due to the phase of the wavefunction. In most applications, the square of the matrix elements are needed and thus the sign maybe of no real consequence.
 
-**Computational details
+Computational details
 ---
+1. Parameter (mean polarizability or anisotropy) is interpolated to the asked wavelength. This is followed by fitting it over inter-nuclear distance using a polynomial function. Fit coefficients are reported in the output.
+2. The expectation value (r<sub>e</sub>) of the inter-nuclear distance is computed for specific ro-vibrational state of H<sub>2</sub>, HD and D<sub>2</sub> , in the electronic ground state.
+3. Using the coefs of polynomial function the derivatives of the parameter are computed at r<sub>e</sub>. Set of derivatives up to 7th order are reported in the output.
+4. Taylor series expansions are generated using the derivatives centered at r<sub>e</sub>. Subsequently, the matrix elements of the Taylor series expansions of the parameter are computed along with that of the original parameter. The set of these matrix elements are also reported in the output.
+
+- The matrix elements are computed as the following integral over the inter-nuclear distance. 
 ![integral image][img0]
 
-where, <img src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmin.png" data-canonical-src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmin.png" width="45" height="15" /> = 0.2 *a.u.* and  <img src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmax.png" data-canonical-src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmax.png" width="45" height="15" /> = 4.48 *a.u.*
+where, <img src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmin.png" data-canonical-src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmin.png" width="45" height="15" /> = 0.5 *a.u.* and  <img src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmax.png" data-canonical-src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/rmax.png" width="45" height="15" /> = 3.0 *a.u.*
 
 **Credits**
 ---
