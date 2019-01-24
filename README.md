@@ -10,8 +10,8 @@ Mean polarizability | <img src="https://github.com/ankit7540/H2-PolarizabilityMa
 Polarizability anisotropy | <img src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/gamma.png" data-canonical-src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/gamma.png" width="155" height="28" />
 
 The above properties are available as parameter for H<sub>2</sub> HD and D<sub>2</sub>.
- - Rovibrational wavefunctions for H<sub>2</sub>, HD and D<sub>2</sub> for v=0--2 and J=0--15. (*This repository deals with computation of the derivatives of the invariants and their Taylor series expansions. For seamlessly performing this set of computation the inter-nuclear distance is truncated to 0.5--3.0 a.u. which allows for the inclusion of wavefunctions up to v=2, J=15. )
- - A python module is included which performs the above computation for the wavelength range : 182.25 to 1320.6 nm.
+ - Rovibrational wavefunctions for H<sub>2</sub>, HD and D<sub>2</sub> for v=0--2 and J=0--15. (*This repository deals with computation of the derivatives of the invariants and their Taylor series expansions. For seamlessly performing this set of computation the inter-nuclear distance is truncated to 0.5--3.0 a.u. which only allows for the inclusion of wavefunctions up to v=2, J=15. )
+ - A python module is included which performs the above computation for the wavelength range : 182.26 to 1320.6 nm.
 
 **Available programs**
 ---
@@ -22,20 +22,12 @@ The programs for computation of matrix element (which includes cubic spline inte
 Clone this repository or download as a zip file. According to the program of choice, refer to the `README.md` for the repository and the `README.md`in the Python-module folder.
 
 
-**Comments on numerical accuracy**
----
-The definite integral calculation is usually accurate to ~1e-6 or better. However, the net numerical uncertainity in the computed matrix element is  +/- 1e-4 which includes the uncertainities introduced by the accuracy of the wavefunctions, polarizability, spline interpolation procedures and physical constants.
-
-**Comments on the sign of the matrix element**
----
-Some matrix elements computed may have -ve sign which arises due to the phase of the wavefunction. In most applications, the square of the matrix elements are needed and thus the sign maybe of no real consequence.
-
 Computational details
 ---
 1. Parameter (mean polarizability or anisotropy) is interpolated to the asked wavelength. This is followed by fitting it over inter-nuclear distance using a polynomial function. Fit coefficients are reported in the output.
-2. The expectation value (r<sub>e</sub>) of the inter-nuclear distance is computed for specific ro-vibrational state of H<sub>2</sub>, HD and D<sub>2</sub> , in the electronic ground state.
-3. Using the coefs of polynomial function the derivatives of the parameter are computed at r<sub>e</sub>. Set of derivatives up to 7th order are reported in the output.
-4. Taylor series expansions are generated using the derivatives centered at r<sub>e</sub>. Subsequently, the matrix elements of the Taylor series expansions of the parameter are computed along with that of the original parameter. The set of these matrix elements are also reported in the output.
+2. The expectation value (r<sub>e</sub>) of the inter-nuclear distance is computed for specific rovibrational state of H<sub>2</sub>, HD and D<sub>2</sub> , in the electronic ground state.
+3. Using the coefficients of polynomial function the derivatives of the parameter are computed at r<sub>e</sub>. Set of derivatives up to 7<sup>th</sup>  order are reported in the output.
+4. Taylor series expansions are generated using the derivatives centered at r<sub>e</sub>. Subsequently, the matrix elements of the Taylor series expansions of the parameter are computed along with that of the original parameter. The set of these matrix elements are reported in the output.
 
 - The matrix elements are computed as the following integral over the inter-nuclear distance. 
 ![integral image][img0]

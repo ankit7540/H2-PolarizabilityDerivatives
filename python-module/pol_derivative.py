@@ -255,6 +255,14 @@ else:
          (omega_nm[-1], 4), round(omega_A[0], 4), round(omega_A[-1], 4)))
     print('\t\toperator	= isotropy or mean polarizability given by "iso" or "mp" or "mean" ')
     print('\t\t\t          anisotropy or polarizability difference or gamma given by "aniso" or "g"  or "diff" ')
+    print('\t\tenable_plot	= 0 or 1 ')
+    print('\t\t\t          0 = do not plot  ')
+    print('\t\t\t          1 = enable plot, requires matplotlib module  ')
+    print('\t\t\t              The plots will be generated as an output.pdf file having 3 plots.')
+    print('\t\t\t              First plot = fit of the parameter with polynomial')
+    print('\t\t\t              Second plot = residual of the fit')
+    print('\t\t\t              Third plot = Taylor series expansion of the parameter along with the ')
+    print('\t\t\t                          original parameter function')
 
     print("...ready.")
 #********************************************************************
@@ -262,7 +270,7 @@ else:
 # vl, Jl, vr , Jr are numbers
 # mol, wavelength unit and operator are string, hence need quotes.
 
-def compute(mol, v, J, wavelength, wavelength_unit, operator):
+def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
     '''#  parameters:
     # mol  =    molecule (for H2 enter "H2", for D2 enter "D2", for HD enter "HD")
     # v   =    vibrational state,  v = [0,2]
@@ -278,7 +286,8 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
                                    Specify operator using the specifier.
                                  ( for  isotropy          use "iso"   or  "mp" or "mean" )
                                  ( for  anisotropy        use "aniso" or  "g"  or "diff" )
-
+    # enable_plot = enable or disable plot , 0=do not plot, 1= enable plotting
+    #               (requires matplotlib)
 
     This function runs on both Python 2.7x and 3.x
     '''
@@ -608,9 +617,8 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator):
         # ----------------------------------------------------------------------------
 
         # OPTIONAL PLOTTING : USING  MATPLOTLIB
-        plot = 0    # change value to 1 to enable plotting
 
-        if plot == 1:
+        if enable_plot == 1:
 
             import matplotlib.pyplot as plt
             from matplotlib.backends.backend_pdf import PdfPages

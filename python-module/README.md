@@ -1,6 +1,6 @@
 Python-module `pol_derivative`
 ----------------
-`pol_derivative` is python module which performs computation of matrix elements for polarizability.
+`pol_derivative` is python module which performs computation for obtaining the derivatives of mean polarizability and polarizability anisotropy invariants (for H2, HD and D2) for specific inter-nuclear distance defined by rovibrational wavefunction for some state.
 
 
 Requirements
@@ -20,22 +20,30 @@ Usage
  ```
 Give  pol_derivative.compute  command with parameters:
         pol_derivative.compute(molecule, v, J, lambda, unit of lambda, operator)
-         for example:  pol_derivative.compute("H2",0,4,488,"n","mp")
-                       pol_derivative.compute("D2",1,0,"static","n","g")
-
-                molecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD"
+         for example:  pol_derivative.compute("H2",0,4,488,"n","mp")  
+                       pol_derivative.compute("D2",1,0,"static","n","g")  
+                
+                molecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD" 
                 v    = vibrational state, [0,2]
                 J    = rotataional state, [0,15]
                 lambda   = wavelength in Hartree, nm or Angstrom, for static specify "s" or "static" here
-                unit of lambda =  for  Hartree           use "H" or "h"
-                                  for  nanometers        use "n" or "nm"
-                                  for  Angstrom          use "a" or "A"
-                                  if static property is asked then this parameter can be any of the three
+                unit of lambda =  for  Hartree           use "H" or "h"  
+                                  for  nanometers        use "n" or "nm" 
+                                  for  Angstrom          use "a" or "A"  
+                                  if static property is asked then this parameter can be any of the three 
                 Available wavelength range: 0.25 - 0.0345 Hartree;
-                                            182.2534 - 1320.6769 nm;
+                                            182.2534 - 1320.6769 nm; 
                                             1822.5341 - 13206.7688 Angstrom
-                operator        = isotropy or mean polarizability given by "iso" or "mp" or "mean"
-                                  anisotropy or polarizability difference or gamma given by "aniso" or "g"  or "diff"
+                operator        = isotropy or mean polarizability given by "iso" or "mp" or "mean" 
+                                  anisotropy or polarizability difference or gamma given by "aniso" or "g"  or "diff" 
+                enable_plot     = 0 or 1 
+                                  0 = do not plot  
+                                  1 = enable plot, requires matplotlib module  
+                                      The plots will be generated as an output.pdf file having 3 plots.
+                                      First plot = fit of the parameter with polynomial
+                                      Second plot = residual of the fit
+                                      Third plot = Taylor series expansion of the parameter along with the 
+                                                  original parameter function
 ...ready.
  ```
 4. Use the following command to do computation of the matrix element.
@@ -59,7 +67,7 @@ Outputs obtained from the command execution is shown below.
 - Analysis of polarizability anisotropy (400 nm) for H<sub>2</sub> at v=0, J=0.
  
 ```
- pol_derivative.compute("H2", 0, 0, 400, "nm", "g") ⏎
+ pol_derivative.compute("H2", 0, 0, 400, "nm", "g", 0) ⏎
 Selected wavelength in nanometer : 400.0, Hartree : 0.113908
 -------------------------------------------------------------------
 Analysis for the derivative of the parameter at re defined by v,J
@@ -113,7 +121,7 @@ g7 = 37.29035527
 - Analysis of mean polarizability (300 nm) for D<sub>2</sub> at v=2, J=11.
 
 ```
-pol_derivative.compute("D2", 2, 11, 300, "nm", "mp")⏎
+pol_derivative.compute("D2", 2, 11, 300, "nm", "mp", 0) ⏎
 Selected wavelength in nanometer : 300.0, Hartree : 0.151878
 -------------------------------------------------------------------
 Analysis for the derivative of the parameter at re defined by v,J
