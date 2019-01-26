@@ -174,9 +174,9 @@ g7 = 43.67467196
 -------------------------------------------------------------------
 ``` 
 
-***Plots***
+**Plots**
 ---
-The following plots are generated when the `enable_plot` option is set to `1` in the `pol_derivative.compute` command. These plots are exported as a pdf file called `output.pdf` in the same directory as the python script.
+The following plots are generated when the `enable_plot` option is set to `1` in the `pol_derivative.compute` command. These plots are exported in a pdf file called `output.pdf` in the same directory as the python script. (To use the `enable_plot` option, `matplotlib` must be available.)
 
 ![Plot of the fit with polynomial][img0]
 ![Plot showing residual of the fit][img1]
