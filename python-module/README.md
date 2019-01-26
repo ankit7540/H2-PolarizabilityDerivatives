@@ -178,13 +178,13 @@ g7 = 43.67467196
 ---
 The following plots are generated when the `enable_plot` option is set to `1` in the `pol_derivative.compute` command. These plots are exported in a pdf file called `output.pdf` in the same directory as the python script. (To use the `enable_plot` option, `matplotlib` must be available.)
 
-<a href="img0"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig0.png" align="center" height="350" ></a>
+- <a href="img0"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig0.png" align="center" height="350" ></a>
 
 
-<a href="img0"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig1.png" align="center" height="350" ></a>
+- <a href="img0"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig1.png" align="center" height="350" ></a>
 
 
-<a href="img0"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig2.png" align="center" height="350" ></a>
+- <a href="img0"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig2.png" align="center" height="350" ></a>
  
 [f1]: http://chart.apis.google.com/chart?cht=tx&chl=\langle\psi_{v=0,J=0}|\bar{\alpha}|\psi_{v=0,J=0}\rangle
 [f2]: http://chart.apis.google.com/chart?cht=tx&chl=\langle\psi_{v=2,J=1}|\gamma|\psi_{v=1,J=1}\rangle
