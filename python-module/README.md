@@ -172,11 +172,21 @@ g7 = 43.67467196
 <psi_2,11| mp(7) |psi_2,11> = 7.085353
 <psi_2,11| mp(infty) |psi_2,11> = 7.085359
 -------------------------------------------------------------------
-
 ``` 
 
+***Plots***
+---
+The following plots are generated when the `enable_plot` option is set to `1` in the `pol_derivative.compute` command. These plots are exported as a pdf file called `output.pdf` in the same directory as the python script.
 
- 
+![Plot of the fit with polynomial][img0]
+![Plot showing residual of the fit][img1]
+![Plot showing the Taylor series expansions of the parameter at r_{e}][img2]
+
+
+
+[img0]: https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig0.png "Plot_0"
+[img1]: https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig1.png "Plot_1"
+[img2]: https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig2.png "Plot_2"
  
 [f1]: http://chart.apis.google.com/chart?cht=tx&chl=\langle\psi_{v=0,J=0}|\bar{\alpha}|\psi_{v=0,J=0}\rangle
 [f2]: http://chart.apis.google.com/chart?cht=tx&chl=\langle\psi_{v=2,J=1}|\gamma|\psi_{v=1,J=1}\rangle
