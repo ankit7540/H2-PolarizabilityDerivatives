@@ -178,6 +178,8 @@ g7 = 43.67467196
 ---
 The following plots are generated when the `enable_plot` option is set to `1` in the `pol_derivative.compute` command. These plots are exported in a pdf file called `output.pdf` in the same directory as the python script. (To use the `enable_plot` option, `matplotlib` must be available.)
 
+<a href="url"><img src="https://github.com/ankit7540/H2-PolarizabilityDerivatives/blob/master/image/fig0.png" align="left" height="350" ></a>
+
 ![Plot of the fit with polynomial][img0]
 ![Plot showing residual of the fit][img1]
 ![Plot showing the Taylor series expansions of the parameter at r_{e}][img2]
