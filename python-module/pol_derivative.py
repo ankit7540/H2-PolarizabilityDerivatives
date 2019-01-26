@@ -237,7 +237,7 @@ else:
 
 
     print("Give  pol_derivative.compute  command with parameters:")
-    print("\tpol_derivative.compute(molecule, v, J, lambda, unit of lambda, operator)")
+    print("\tpol_derivative.compute(molecule, v, J, lambda, unit of lambda, operator, enable_plot)")
     print('\t for example:  pol_derivative.compute("H2",0,4,488,"n","mp")  ')
     print('\t\t       pol_derivative.compute("D2",1,0,"static","n","g")  ')
     print("\t\t")
