@@ -22,8 +22,8 @@ The following commands are run under the Python interpreter environment.
  ```
 Give  pol_derivative.compute  command with parameters:
         pol_derivative.compute(molecule, v, J, lambda, unit of lambda, operator, enable_plot)
-         for example:  pol_derivative.compute("H2",0,4,488,"n","mp")  
-                       pol_derivative.compute("D2",1,0,"static","n","g")  
+         for example:  pol_derivative.compute("H2", 0, 4, 488, "n", "mp", 0)  
+                       pol_derivative.compute("D2", 1, 0, "static", "n", "g", 1)  
                 
                 molecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD" 
                 v    = vibrational state, [0,2]
