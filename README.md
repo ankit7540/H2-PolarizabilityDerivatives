@@ -10,7 +10,7 @@ Mean polarizability | <img src="https://github.com/ankit7540/H2-PolarizabilityMa
 Polarizability anisotropy | <img src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/gamma.png" data-canonical-src="https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/gamma.png" width="155" height="28" />
 
 The above properties are available as parameter for H<sub>2</sub> HD and D<sub>2</sub>.
- - Rovibrational wavefunctions for H<sub>2</sub>, HD and D<sub>2</sub> for v=0--2 and J=0--15. (*This repository deals with computation of the derivatives of the invariants and their Taylor series expansions. For seamlessly performing this set of computation the inter-nuclear distance is truncated to 0.5--3.0 a.u. which only allows for the inclusion of wavefunctions up to v=2, J=15. )
+ - Rovibrational wavefunctions for H<sub>2</sub>, HD and D<sub>2</sub> for v=0--2 and J=0--15. (**#** This repository deals with computation of the derivatives of the invariants and their Taylor series expansions. For seamlessly performing this set of computation with minimal introduction of error, the inter-nuclear distance is truncated to 0.5--3.0 a.u. which only allows for the inclusion of wavefunctions up to v=2, J=15. )
  - A python module is included which performs the above computation for the wavelength range : 182.26 to 1320.6 nm.
 
 **Available programs**
