@@ -5,7 +5,7 @@ Python-module `pol_derivative`
 
 Requirements
 ----------------
-Python 2.7 or Python 3.x with `numpy` and `scipy` modules. For plot of fit, residual and the Taylor series expansions `matplotlib` module is required.
+Python 2.7 or Python 3.x with `numpy` and `scipy` modules. For generating the plot of fit, residual and the Taylor series expansions `matplotlib` module is required.
 
 Usage
 ----------------
@@ -16,7 +16,7 @@ The following commands are run under the Python interpreter environment.
     
     > sys.path.append("..")
      
-2. Import the `pol_derivative` which should be in your current folder. (Directly execute the following command when using Python3)
+2. Import the `pol_derivative` which should be in your current folder (directly execute the following command when using Python3).
     > import pol_derivative
 3. If all requirements are met the following output should be produced.
  ```
