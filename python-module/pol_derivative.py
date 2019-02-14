@@ -167,20 +167,30 @@ def splint(xa, ya, y2a, x):
     return y #returns the interpolated value
 
 #************************************************************************
-
-# Define the fitting function : polynomial of degree 11
-def poly11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
-    '''Polynomial function without scaling the x. Used for plotting'''
-    return c0+(c1*x)+c2*(x**2)+c3*(x**3)+c4*(x**4)+c5*(x**5)+c6*(x**6)+c7*(x**\
-    7)+c8*(x**8)+c9*(x**9)+c10*(x**10)+c11*(x**11)
-
-#************************************************************************
-
+# Define the factorial function
+def factorial(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorial(n-1)    
+#************************************************************************    
 # Define the fitting function : scaled polynomial of degree 11
 def poly11_sc(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
     '''Polynomial function with scaled x. Ensures better numerical accuracy'''
-    return c0+(c1*x/3.0)+c2*((x/3.0)**2)+c3*((x/3.0)**3)+c4*((x/3.0)**4)+c5*((x/3.0)**5)+c6*\
-    ((x/3.0)**6)+c7*((x/3.0)**7)+c8*((x/3.0)**8)+c9*((x/3.0)**9)+c10*((x/3.0)**10)+c11*((x/3.0)**11)
+    return c0+(c1*x/3.0)+c2*((x/3.0)**2)+c3*((x/3.0)**3)+c4*((x/3.0)**4)+c5*((\
+    x/3.0)**5)+c6*((x/3.0)**6)+c7*((x/3.0)**7)+c8*((x/3.0)**8)+c9*((x/3.0)**9)\
+    +c10*((x/3.0)**10)+c11*((x/3.0)**11)
+
+#************************************************************************
+# Define the fitting function : scaled polynomial of degree 11
+
+def TaylorExp11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, r):
+    '''Taylor series expansion at r using up to 11th order derivative'''
+    return c0+(c1*(x-r))+(c2/factorial(2))*(x-r)**2+(c3/factorial(3))*(x-r)**3\
+    +(c4/factorial(4))*(x-r)**4+(c5/factorial(5))*(x-r)**5+(c6/factorial(6))*(\
+    x-r)**6+(c7/factorial(7))*(x-r)**7+(c8/factorial(8))*(x-r)**8+(c9/\
+    factorial(9))*(x-r)**9+(c10/factorial(10))*(x-r)**10+(c11/factorial(11))*\
+    (x-r)**11
 
 #************************************************************************
 
@@ -468,13 +478,22 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
 
     # Step 4 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
         popt_sc, pcov_sc = curve_fit(poly11_sc, distance, parameter)
+        
+        init=np.ones(12)
+        init[0]=2
+        init[1]=3
+        init[2]=4
+        init[3]=0.1
+        print(init)
+        #popt2, pcov2 = curve_fit(TaylorExp11, distance, parameter, p0=init)
+        popt3,pcov3 = curve_fit(lambda x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11: TaylorExp11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, re), distance, parameter)
 
         popt = np.zeros(12)
 
         # fit coeffcients
         print("\n(1.) Fit coefficients (scaled back using 3^{n})\n[parameter vs distance was fit using poly11_sc function]")
         for j in range(len(popt_sc)):
-            print("c{0} = {1}".format(j, round(popt_sc[j]/(3.0**j), 10)))
+            print("c{0} = {1}, {2}".format(j, round(popt_sc[j]/(3.0**j), 10), popt3[j]))
             popt[j] = popt_sc[j]/(3.0**j)    # rescale the fit coefficients
 
         # covariance of the fit coefficients
@@ -684,3 +703,4 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
                 pdf.savefig(fig, bbox_inches="tight")
             pdf.close()
         # ----------------------------------------------------------------------------
+compute( "H2", 0,0, 532, "n", "g", 0)        
