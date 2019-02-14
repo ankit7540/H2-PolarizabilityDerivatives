@@ -471,82 +471,21 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
         parameter = parameter[:101]
         parameter = np.reshape(parameter, len(parameter))
 
-        #print("distance array: first point={0}, last point={1} " .format(round(distance[0],9) \
-        #, round(distance[-1],9)  ))
-        #print("parameter array: first point={0}, last point={1} " .format(np.round(parameter[0]\
-        #,9) , np.round(parameter[-1],9)  ))
-
     # Step 4 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
-        popt_sc, pcov_sc = curve_fit(poly11_sc, distance, parameter)
-        
-        init=np.ones(12)
-        init[0]=2
-        init[1]=3
-        init[2]=4
-        init[3]=0.1
-        print(init)
-        #popt2, pcov2 = curve_fit(TaylorExp11, distance, parameter, p0=init)
-        popt3,pcov3 = curve_fit(lambda x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11: TaylorExp11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, re), distance, parameter)
-
-        popt = np.zeros(12)
-
-        # fit coeffcients
-        print("\n(1.) Fit coefficients (scaled back using 3^{n})\n[parameter vs distance was fit using poly11_sc function]")
-        for j in range(len(popt_sc)):
-            print("c{0} = {1}, {2}".format(j, round(popt_sc[j]/(3.0**j), 10), popt3[j]))
-            popt[j] = popt_sc[j]/(3.0**j)    # rescale the fit coefficients
+        popt, pcov = curve_fit(lambda x, c0, c1, c2, c3, c4, c5, c6, c7, c8,\
+        c9, c10, c11: TaylorExp11(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, \
+        c10, c11, re), distance, parameter)
 
         # covariance of the fit coefficients
         #print(pcov)
     #-----------------------------------------------------------------------------
 
-
     # Step 5 : Obtain the numerical value of the derivative at re ----------------
-    # These are described as g0, g1, .. g6, g7
-
-    #  g0 is the interpolated value of parameter at re
-    #  g1,.. g7 are obtained using the coeffs of polynomial fit
-
-        gn = np.zeros(8)
-
-        der2 = fd_ends(distance, parameter)
-        secarray2 = spline(distance, parameter, der2[0], der2[1])
-
-        gn[0] = splint(distance, parameter, secarray2, re)
-
-
-        gn[1] = popt[1]+2*popt[2]*re+(3*popt[3]*re**2)+(4*popt[4]*re**3)+(5*popt[5]\
-        *re**4)+(6*popt[6]*re**5)+(7*popt[7]*re**6)+(8*popt[8]*re**7)+(9*popt[\
-        9]*re**8)+(10*popt[10]*re**9)+(11*popt[11]*re**10)
-
-        gn[2] = 2*popt[2]+(2*3*popt[3]*re)+(3*4*popt[4]*re**2)+(4*5*popt[5]*re**3)+\
-        (5*6*popt[6]*re**4)+(6*7*popt[7]*re**5)+(7*8*popt[8]*re**6)+(8*9*popt[\
-        9]*re**7)+(9*10*popt[10]*re**8)+(10*11*popt[11]*re**9)
-
-        gn[3] = (2*3*popt[3])+(2*3*4*popt[4]*re)+(3*4*5*popt[5]*re**2)+(4*5*6*     \
-        popt[6]*re**3)+(5*6*7*popt[7]*re**4)+(6*7*8*popt[8]*re**5)+(7*8*9*    \
-        popt[9]*re**6)+(8*9*10*popt[10]*re**7)+(9*10*11*popt[11]*re**8)
-
-        gn[4] = (2*3*4*popt[4])+(2*3*4*5*popt[5]*re)+(3*4*5*6*popt[6]*re**2)+(4*5*6\
-        *7*popt[7]*re**3)+(5*6*7*8*popt[8]*re**4)+(6*7*8*9*popt[9]*re**5)+(7*8\
-        *9*10*popt[10]*re**6)+(8*9*10*11*popt[11]*re**7)
-
-        gn[5] = (2*3*4*5*popt[5])+(2*3*4*5*6*popt[6]*re)+(3*4*5*6*7*popt[7]*re**2)+\
-        (4*5*6*7*8*popt[8]*re**3)+(5*6*7*8*9*popt[9]*re**4)+(6*7*8*9*10*      \
-        popt[10]*re**5)+(7*8*9*10*11*popt[11]*re**6)
-
-        gn[6] = (2*3*4*5*6*popt[6])+(2*3*4*5*6*7*popt[7]*re)+(3*4*5*6*7*8*popt[8]* \
-        re**2)+(4*5*6*7*8*9*popt[9]*re**3)+(5*6*7*8*9*10*popt[10]*re**4)+(6*7*\
-        8*9*10*11*popt[11]*re**5)
-
-        gn[7] = (2*3*4*5*6*7*popt[7])+(2*3*4*5*6*7*8*popt[8]*re)+(3*4*5*6*7*8*9*   \
-        popt[9]*re**2)+(4*5*6*7*8*9*10*popt[10]*re**3)+(5*6*7*8*9*10*11*      \
-        popt[11]*re**4)
 
         # Derivatives of parameter at re
-        print("\n(2.) Derivatives of parameter at r_e")
-        for j in range(len(gn)):
-            print("g{0} = {1}".format(j, round(gn[j], 8)))
+        print("\n(1.) Derivatives of parameter at r_e")
+        for j in range(len(popt)):
+            print("d{0} = {1}".format(j, round(popt[j], 8)))
 
         # ----------------------------------------------------------------------------
         # ----------------------------------------------------------------------------
@@ -557,32 +496,32 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
         expn = np.zeros(shape=(len(distance), 8))
         r_re = distance-re
 
-        expn[:, 0] = np.full(len(distance), gn[0])
-        expn[:, 1] = np.fromiter((gn[0]+gn[1]*r_re[x] for x in range(         \
+        expn[:, 0] = np.full(len(distance), popt[0])
+        expn[:, 1] = np.fromiter((popt[0]+popt[1]*r_re[x] for x in range(         \
         len(distance))), dtype="float")
 
-        expn[:, 2] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2) for\
+        expn[:, 2] = np.fromiter((popt[0]+popt[1]*r_re[x]+0.5*popt[2]*(r_re[x]**2) for\
         x in range(len(distance))), dtype="float")
 
-        expn[:, 3] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
-        (1/6)*gn[3]*(r_re[x]**3) for x in range(len(distance))), dtype="float")
+        expn[:, 3] = np.fromiter((popt[0]+popt[1]*r_re[x]+0.5*popt[2]*(r_re[x]**2)+ \
+        (1/6)*popt[3]*(r_re[x]**3) for x in range(len(distance))), dtype="float")
 
-        expn[:, 4] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
-        (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4) for x in range(len \
+        expn[:, 4] = np.fromiter((popt[0]+popt[1]*r_re[x]+0.5*popt[2]*(r_re[x]**2)+ \
+        (1/6)*popt[3]*(r_re[x]**3)+(1/24)*popt[4]*(r_re[x]**4) for x in range(len \
         (distance))), dtype="float")
 
-        expn[:, 5] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
-        (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
+        expn[:, 5] = np.fromiter((popt[0]+popt[1]*r_re[x]+0.5*popt[2]*(r_re[x]**2)+ \
+        (1/6)*popt[3]*(r_re[x]**3)+(1/24)*popt[4]*(r_re[x]**4)+(1/120)*popt[5]*     \
         (r_re[x]**5) for x in range(len(distance))), dtype="float")
 
-        expn[:, 6] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
-        (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
-        (r_re[x]**5)+(1/720)*gn[6]*(r_re[x]**6) for x in range(len(distance)))\
+        expn[:, 6] = np.fromiter((popt[0]+popt[1]*r_re[x]+0.5*popt[2]*(r_re[x]**2)+ \
+        (1/6)*popt[3]*(r_re[x]**3)+(1/24)*popt[4]*(r_re[x]**4)+(1/120)*popt[5]*     \
+        (r_re[x]**5)+(1/720)*popt[6]*(r_re[x]**6) for x in range(len(distance)))\
         , dtype="float")
 
-        expn[:, 7] = np.fromiter((gn[0]+gn[1]*r_re[x]+0.5*gn[2]*(r_re[x]**2)+ \
-        (1/6)*gn[3]*(r_re[x]**3)+(1/24)*gn[4]*(r_re[x]**4)+(1/120)*gn[5]*     \
-        (r_re[x]**5)+(1/720)*gn[6]*(r_re[x]**6)+(1/5040)*gn[7]*(r_re[x]**7)   \
+        expn[:, 7] = np.fromiter((popt[0]+popt[1]*r_re[x]+0.5*popt[2]*(r_re[x]**2)+ \
+        (1/6)*popt[3]*(r_re[x]**3)+(1/24)*popt[4]*(r_re[x]**4)+(1/120)*popt[5]*     \
+        (r_re[x]**5)+(1/720)*popt[6]*(r_re[x]**6)+(1/5040)*popt[7]*(r_re[x]**7)   \
         for x in range(len(distance))), dtype="float")
 
     # ----------------------------------------------------------------------------
@@ -616,7 +555,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
             parameter_ME[j] = res[0]
 
-        print("\n(3.) Matrix elements of parameter using Taylor series \n  expansions (at r_e) using n^{th} order derivatives")
+        print("\n(2.) Matrix elements of parameter using Taylor series \n  expansions (at r_e) using n^{th} order derivatives")
         for j in range(len(parameter_ME)):
             print("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator, j, v, J, round(parameter_ME[j], 6)))
 
@@ -650,7 +589,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             ax0 = plt.axes()
             plt.title('Fitting of the parameter using polynomial function')
             plt.plot(distance, parameter, linewidth=5)
-            plt.plot(distance, poly11(distance, *popt), linewidth=2.0)
+            plt.plot(distance, TaylorExp11(distance, *popt, re), linewidth=2.0)
             plt.xlabel('Inter-nuclear distance [a.u.]')
             plt.ylabel('{0}, {1} {2} {3}  [a.u.]'.format(name, wavelength, wavelength_unit, mol))
             plt.grid(True)
@@ -659,7 +598,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             plt.text(0.05, 0.00001, txt, fontsize=5, color="dimgrey", transform=plt.gcf().transFigure)
 
             # Generate residual
-            residual = parameter-poly11(distance, *popt)
+            residual = parameter-TaylorExp11(distance, *popt, re)
 
             # FIGURE 1 INITIALIZED
             plt.figure(1)
@@ -702,5 +641,4 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             for fig in range(nfig+1): #loop over plots
                 pdf.savefig(fig, bbox_inches="tight")
             pdf.close()
-        # ----------------------------------------------------------------------------
-compute( "H2", 0,0, 532, "n", "g", 0)        
+        # ----------------------------------------------------------------------------     
