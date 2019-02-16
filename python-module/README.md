@@ -80,7 +80,6 @@ Parameter = ['anisotropy']
 Wavelength = 325 nm
 Rovibrational state : v=0, J=0
 Expectation value of inter-nuclear distance, r_e = 1.448725 a.u.
-0.5 0.141132549699 3.0 12.3954767626
 
 (1.) Derivatives of parameter at r_e
 d0 = 2.22004074
@@ -124,7 +123,6 @@ Parameter = ['isotropy']
 Wavelength = 300 nm
 Rovibrational state : v=2, J=11
 Expectation value of inter-nuclear distance, r_e = 1.64561 a.u.
-0.5 2.18821217094 3.0 14.6832888904
 
 (1.) Derivatives of parameter at r_e
 d0 = 6.96793144

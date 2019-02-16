@@ -479,8 +479,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             psi1 = psi1[75:]
             psi2 = psi2[:701]
             psi2 = psi2[75:]
-
-            print(distance[0], parameter[0],distance[-1], parameter[-1])
+            #print(distance[0], parameter[0],distance[-1], parameter[-1])
 
         else :
             # for v=3 and 4 truncate to r=0.7 to 3.8 a.u.
@@ -497,7 +496,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             psi1 = psi1[:776]
             psi2 = psi2[125:]
             psi2 = psi2[:776]
-            print(rwave[0],rwave[-1],psi1[0],psi1[-1],psi2[0],psi2[-1])
+            #print(rwave[0],rwave[-1],psi1[0],psi1[-1],psi2[0],psi2[-1])
 
 
     # Step 4 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
