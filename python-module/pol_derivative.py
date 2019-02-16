@@ -172,8 +172,8 @@ def factorial(n):
     if n == 0:
         return 1
     else:
-        return n * factorial(n-1)    
-#************************************************************************    
+        return n * factorial(n-1)
+#************************************************************************
 # Define the fitting function : scaled polynomial of degree 11
 def poly11_sc(x, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11):
     '''Polynomial function with scaled x. Ensures better numerical accuracy'''
@@ -253,7 +253,7 @@ else:
     print("\t\t")
 
     print('\t\tmolecule = for H2 enter "H2", for D2 enter "D2", for HD enter "HD" ')
-    print("\t\tv    = vibrational state, [0,2]")
+    print("\t\tv    = vibrational state, [0,4]")
     print("\t\tJ    = rotataional state, [0,15]")
     print('\t\tlambda   = wavelength in Hartree, nm or Angstrom, for static specify "s" or "static" here')
     print('\t\tunit of lambda =  for  Hartree           use "H" or "h"  ')
@@ -283,7 +283,7 @@ else:
 def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
     '''#  parameters:
     # mol  =    molecule (for H2 enter "H2", for D2 enter "D2", for HD enter "HD")
-    # v   =    vibrational state,  v = [0,2]
+    # v   =    vibrational state,  v = [0,4]
     # J   =    rotational state, J = [0,15]
     # wavelength =  wavelength ( can be Hartree, nanometers or Angstrom)
     # wavelength_unit = specify unit using the specifier
@@ -345,8 +345,8 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
     Wfn2 = "./wavefunctions/{0}v{1}J{2}_norm.txt".format(mol, v, J)
     r_wave = "./wavefunctions/r_wave.txt"
     #print(Wfn1,Wfn2)
-    if v < 0  or v > 2:
-        print("Error : v value out of range. v = [0,2]. Exiting ")
+    if v < 0  or v > 4:
+        print("Error : v value out of range. v = [0,4]. Exiting ")
         quit()
 
     if J < 0   or J > 15:
@@ -463,13 +463,42 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
         print("Expectation value of inter-nuclear distance, r_e = {0} a.u.". format(round(re, 6)))
     # ----------------------------------------------------------------------------
 
-	# Step 3 : Perform truncation of parameter and corresponding x-axis to 0.5--3.0 a.u.
-        distance = distance[9:]
-        distance = distance[:101]
+	# Step 3 : Perform truncation of parameter and corresponding x-axis
 
-        parameter = parameter[9:]
-        parameter = parameter[:101]
-        parameter = np.reshape(parameter, len(parameter))
+        if (v<3):
+            # for v=0, v=1 and 2, truncate to  0.5--3.0 a.u.
+            distance = distance[9:]
+            distance = distance[:101]
+            parameter = parameter[9:]
+            parameter = parameter[:101]
+            parameter = np.reshape(parameter, len(parameter))
+
+            rwave = rwave[:701]
+            rwave = rwave[75:]
+            psi1 = psi1[:701]
+            psi1 = psi1[75:]
+            psi2 = psi2[:701]
+            psi2 = psi2[75:]
+
+            print(distance[0], parameter[0],distance[-1], parameter[-1])
+
+        else :
+            # for v=3 and 4 truncate to r=0.7 to 3.8 a.u.
+            distance = distance[17:]
+            distance = distance[:125]
+            parameter = parameter[17:]
+            parameter = parameter[:125]
+            parameter = np.reshape(parameter, len(parameter))
+            print(distance[0], parameter[0],distance[-1], parameter[-1])
+
+            rwave = rwave[125:]
+            rwave = rwave[:776]
+            psi1 = psi1[125:]
+            psi1 = psi1[:776]
+            psi2 = psi2[125:]
+            psi2 = psi2[:776]
+            print(rwave[0],rwave[-1],psi1[0],psi1[-1],psi2[0],psi2[-1])
+
 
     # Step 4 : Fitting the parameter over distance in the range 0.5--3.0 a.u. ----
         popt, pcov = curve_fit(lambda x, c0, c1, c2, c3, c4, c5, c6, c7, c8,\
@@ -528,16 +557,6 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
     # Computation of the matrix element for the Taylor series expansions of
     #   the parameter using the expn array(as columns)
 
-        # truncate the rwave, psi1 and psi2 to r=0.5--3.0 a.u.
-        rwave = rwave[:701]
-        rwave = rwave[75:]
-
-        psi1 = psi1[:701]
-        psi1 = psi1[75:]
-
-        psi2 = psi2[:701]
-        psi2 = psi2[75:]
-
         parameter_ME = np.zeros(8)    # array to keep the matrix elements
         param_sc = np.zeros(len(rwave))   # interpolation of the expn to rwave
 
@@ -552,12 +571,16 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             for k in range(0, len(rwave)):
                 param_sc[k] = splint(distance, param, secarray2, rwave[k])
 
-            res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+            if (v>3):
+                res = compute_int(rwave, psi1, psi2, param_sc, 0.7, 3.8)
+            else:
+                res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+
             parameter_ME[j] = res[0]
 
         print("\n(2.) Matrix elements of parameter using Taylor series \n  expansions (at r_e) using n^{th} order derivatives")
         for j in range(len(parameter_ME)):
-            print("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator, j, v, J, round(parameter_ME[j], 6)))
+            print("<psi_{0},{1}| {2}({3}) |psi_{4},{5}> = {6}".format(v, J, operator, j, v, J, round(parameter_ME[j], 5)))
 
 
         # compute the matrix element for the original parameter array (no approximation)
@@ -566,10 +589,13 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
         for j in range(0, len(rwave)):
             param_sc[j] = splint(distance, parameter, secarray2, rwave[j])
 
-        res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
+        if (v>3):
+            res = compute_int(rwave, psi1, psi2, param_sc, 0.7, 3.8)
+        else:
+            res = compute_int(rwave, psi1, psi2, param_sc, 0.5, 3.0)
         parameter_trueME = res[0]
 
-        print("<psi_{0},{1}| {2}(infty) |psi_{3},{4}> = {5}".format(v, J, operator, v, J, round(parameter_trueME, 6)))
+        print("<psi_{0},{1}| {2}(infty) |psi_{3},{4}> = {5}".format(v, J, operator, v, J, round(parameter_trueME, 5)))
         print("-------------------------------------------------------------------")
 
         # ----------------------------------------------------------------------------
@@ -641,4 +667,7 @@ def compute(mol, v, J, wavelength, wavelength_unit, operator, enable_plot):
             for fig in range(nfig+1): #loop over plots
                 pdf.savefig(fig, bbox_inches="tight")
             pdf.close()
-        # ----------------------------------------------------------------------------     
+        # ----------------------------------------------------------------------------
+
+
+
