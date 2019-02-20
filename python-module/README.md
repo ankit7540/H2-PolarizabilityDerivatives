@@ -65,7 +65,7 @@ Give  pol_derivative.compute  command with parameters:
 **Examples**
 ---
 
-Outputs obtained from the command execution is shown below.
+Outputs obtained from the command execution is shown below. The derivatives at r<sub>e</sub> are shown as d0,..,d11. The matrix elements are listed as g(0),.., g(7) or mp(0),... , mp(7).
 
 - Analysis of polarizability anisotropy (400 nm) for H<sub>2</sub> at v=0, J=0.
  
