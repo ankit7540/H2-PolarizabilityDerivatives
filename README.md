@@ -1,4 +1,6 @@
 # H<sub>2</sub>-PolarizabilityDerivatives
+Link to the article : https://doi.org/10.1080/00268976.2019.1632950
+
 Set of data on the static and dynamic invariants of polarizability (mean polarizability and anisotropy) with programs for obtaining the derivatives of these invariants (for H<sub>2</sub>, HD and D<sub>2</sub>) for specific inter-nuclear distance defined by rovibrational wavefunction for some state.
 
 This repository contains :
@@ -49,6 +51,10 @@ For evaluation of the definite integral the Adaptive Gausssian Quadrature implem
 Python code by Ankit Raj (NCTU, Taiwan).
 
 ---
+
+===
+This work has been published in the following article:
+Ankit Raj, Henryk A. Witek & Hiro-o Hamaguchi Vibration–rotation interactions in H2, HD and D2 : centrifugal distortion factors and the derivatives of polarisability invariants, Mol Phys, DOI: 10.1080/00268976.2019.1632950
 
 
 
