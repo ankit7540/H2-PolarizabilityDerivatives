@@ -56,7 +56,7 @@ Python code by Ankit Raj (NCTU, Taiwan).
 Ankit Raj, Henryk A. Witek & Hiro-o Hamaguchi<br>
 Vibration–rotation interactions in H2, HD and D2 : centrifugal distortion factors and the derivatives of polarisability invariants<br>
 *Molecular Physics*<br>
-DOI: 10.1080/00268976.2019.1632950
+DOI: https://doi.org/10.1080/00268976.2019.1632950
 
 
 [img0]: https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/01-05-2018_82.png "Logo Title Text 2"
