@@ -1,7 +1,7 @@
 # H<sub>2</sub>-PolarizabilityDerivatives
-Link to the article : https://doi.org/10.1080/00268976.2019.1632950
+Link to the article : https://doi.org/10.1080/00268976.2019.1632950 | DOI  for code : [![DOI](https://zenodo.org/badge/166674944.svg)](https://zenodo.org/badge/latestdoi/166674944)
 
-[![DOI](https://zenodo.org/badge/166674944.svg)](https://zenodo.org/badge/latestdoi/166674944)
+
 
 Set of data on the static and dynamic invariants of polarizability (mean polarizability and anisotropy) with programs for obtaining the derivatives of these invariants (for H<sub>2</sub>, HD and D<sub>2</sub>) for specific inter-nuclear distance defined by rovibrational wavefunction for some state.
 
@@ -59,6 +59,8 @@ Ankit Raj, Henryk A. Witek & Hiro-o Hamaguchi<br>
 Vibration–rotation interactions in H2, HD and D2 : centrifugal distortion factors and the derivatives of polarisability invariants<br>
 *Molecular Physics*<br>
 DOI: https://doi.org/10.1080/00268976.2019.1632950
+
+Citing this code : [![DOI](https://zenodo.org/badge/166674944.svg)](https://zenodo.org/badge/latestdoi/166674944)
 
 
 [img0]: https://github.com/ankit7540/H2-PolarizabilityMatrixElements/blob/master/image/01-05-2018_82.png "Logo Title Text 2"
